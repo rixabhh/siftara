@@ -30,6 +30,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QuizPlayer } from "@/components/quiz/quiz-player";
 import { api } from "@/lib/api";
+import { issueCertificate } from "@/app/(dashboard)/learn/issue-certificate-action";
 import { cn } from "@/lib/utils";
 
 type LearningQuiz = Quiz & { questions: QuizQuestion[] };
@@ -56,10 +57,9 @@ interface StoredProgress {
 interface LearningWorkspaceProps {
   course: Course;
   modules: LearningModule[];
-  certificateCode: string;
 }
 
-export function LearningWorkspace({ course, modules, certificateCode }: LearningWorkspaceProps) {
+export function LearningWorkspace({ course, modules }: LearningWorkspaceProps) {
   const lessons = useMemo(
     () =>
       modules.flatMap((module, moduleIndex) =>
@@ -289,7 +289,6 @@ export function LearningWorkspace({ course, modules, certificateCode }: Learning
           {activeView.type === "certificate" && (
             <CertificatePanel
               course={course}
-              certificateCode={certificateCode}
               trustResult={trustResult}
             />
           )}
@@ -487,13 +486,34 @@ function QuizPanel({
 
 function CertificatePanel({
   course,
-  certificateCode,
   trustResult,
 }: {
   course: Course;
-  certificateCode: string;
   trustResult: CertificateTrustResult;
 }) {
+  const [issuing, setIssuing] = useState(false);
+  const [issued, setIssued] = useState(false);
+
+  async function handleIssueCertificate() {
+    if (!trustResult.eligible || issuing) return;
+    setIssuing(true);
+    try {
+      const result = await issueCertificate({
+        courseId: course.id,
+        courseTitle: course.title,
+        skills: course.skills,
+        quizAverage: trustResult.quizAverage,
+        trustScore: trustResult.trustScore,
+      });
+      if (result.certificateCode) {
+        setIssued(true);
+        window.location.href = `/certificates/verify/${result.certificateCode}`;
+      }
+    } catch {
+      setIssuing(false);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <Card className="overflow-hidden border-border/50">
@@ -528,17 +548,25 @@ function CertificatePanel({
             ))}
           </div>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <Button disabled={!trustResult.eligible} asChild={trustResult.eligible} className="gap-2">
-              {trustResult.eligible ? (
-                <Link href={`/certificates/verify/${certificateCode}`}>
+            <Button
+              disabled={!trustResult.eligible || issuing || issued}
+              onClick={handleIssueCertificate}
+              className="gap-2"
+            >
+              {issuing ? (
+                <>Issuing...</>
+              ) : issued ? (
+                <>Issued</>
+              ) : trustResult.eligible ? (
+                <>
                   <Award className="h-4 w-4" />
-                  View Verified Certificate
-                </Link>
+                  Claim Verified Certificate
+                </>
               ) : (
-                <span>
+                <>
                   <LockKeyhole className="h-4 w-4" />
                   Complete Trust Checks
-                </span>
+                </>
               )}
             </Button>
             <Button variant="outline" asChild>

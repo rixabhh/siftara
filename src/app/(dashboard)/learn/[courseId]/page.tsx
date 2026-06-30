@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  getDemoCertificateCode,
   getLessonsByModule,
   getModulesByCourse,
   getQuizByModule,
@@ -43,7 +42,6 @@ export default async function LearnPage({
     <LearningWorkspace
       course={course}
       modules={modules}
-      certificateCode={getDemoCertificateCode(course.id)}
     />
   );
 }
