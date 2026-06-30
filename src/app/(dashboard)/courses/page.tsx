@@ -2,18 +2,9 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { getDb, schema } from "@/lib/db";
 import { seedCourses } from "@/lib/db/seed";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { CourseFilters } from "@/components/course-filters";
-import { ArrowRight, Clock, Award, BookOpen } from "lucide-react";
-
-const categoryColors: Record<string, string> = {
-  Development: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  Design: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
-  "AI Tools": "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  Data: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  Marketing: "bg-pink-500/10 text-pink-600 dark:text-pink-400",
-};
+import { ArrowRight, Clock, BookOpen, ShieldCheck } from "lucide-react";
 
 type Course = {
   id: string;
@@ -65,15 +56,15 @@ export default async function CoursesPage({
     : allCourses.filter((c) => c.category === category);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Explore Curated Paths</h1>
-        <p className="mt-2 text-muted-foreground">
-          High-quality learning content, structured by Siftara.
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Explore Library</h1>
+        <p className="mt-2 text-muted-foreground text-lg">
+          Discover verifiable courses to boost your Sift Score.
         </p>
       </div>
 
-      <Suspense fallback={<div className="mb-8 flex gap-2">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-7 w-20 animate-pulse rounded-md bg-muted" />)}</div>}>
+      <Suspense fallback={<div className="mb-8 flex gap-2">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-9 w-24 animate-pulse rounded-full bg-muted" />)}</div>}>
         <CourseFilters />
       </Suspense>
 
@@ -90,48 +81,54 @@ export default async function CoursesPage({
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {courses.map((course) => (
-            <Link key={course.id} href={`/courses/${course.slug}`} className="group">
-              <Card className="h-full border-border/50 hover:shadow-lg hover:border-primary/20 transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Badge variant="secondary" className={categoryColors[course.category] || ""}>
-                      {course.category}
-                    </Badge>
-                    <Badge variant="outline">{course.difficulty}</Badge>
-                    {course.certificateEnabled && (
-                      <Badge variant="outline" className="gap-1">
-                        <Award className="h-3 w-3" />
-                      </Badge>
-                    )}
+        <div className="space-y-4">
+          {courses.map((course, idx) => (
+            <Link key={course.id} href={`/courses/${course.slug}`} className="group block">
+              <Card className="border-border/50 hover:border-primary/20 transition-colors overflow-hidden">
+                {/* Thumbnail placeholder */}
+                <div className="h-48 bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+                  <BookOpen className="h-12 w-12 text-muted-foreground/30" />
+                </div>
+                <CardContent className="p-5">
+                  {/* Verified badge */}
+                  {course.certificateEnabled && (
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <ShieldCheck className="h-4 w-4 text-primary" />
+                      <span className="text-xs font-medium text-primary">Siftara Verified</span>
+                    </div>
+                  )}
+
+                  {/* Meta */}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                    <Clock className="h-3.5 w-3.5" />
+                    <span>Est. {Math.floor(course.estimatedMinutes / 60)}h {course.estimatedMinutes % 60}m</span>
+                    <span>·</span>
+                    <span>{course.difficulty}</span>
                   </div>
 
-                  <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">
+                  {/* Title & description */}
+                  <h3 className="text-lg font-semibold group-hover:text-primary transition-colors mb-2">
                     {course.title}
                   </h3>
-                  <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{course.description}</p>
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                    {course.description}
+                  </p>
 
-                  <div className="mt-4 flex flex-wrap gap-1.5">
-                    {course.skills.map((skill) => (
-                      <Badge key={skill} variant="secondary" className="text-xs">
-                        {skill}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between border-t pt-4">
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {Math.floor(course.estimatedMinutes / 60)}h {course.estimatedMinutes % 60}m
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <BookOpen className="h-3 w-3" />
-                        {course.sourceCreator}
-                      </span>
+                  {/* Footer */}
+                  <div className="flex items-center justify-between border-t pt-4">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <div className="flex -space-x-1.5">
+                        {["A", "B", "C"].map((l, i) => (
+                          <div key={i} className="h-5 w-5 rounded-full bg-muted border border-background flex items-center justify-center text-[9px] font-medium">
+                            {l}
+                          </div>
+                        ))}
+                      </div>
+                      <span>+{120 + idx * 80} enrolled</span>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                    <span className="text-sm font-medium text-primary group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                      Start <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
                   </div>
                 </CardContent>
               </Card>
