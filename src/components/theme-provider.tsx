@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useCallback, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useContext, useCallback, useState, useEffect, type ReactNode } from "react";
 
 type Theme = "light" | "dark" | "system";
 
@@ -16,7 +16,7 @@ const ThemeContext = createContext<ThemeContextValue>({
   resolvedTheme: "light",
 });
 
-function getStoredTheme(): Theme {
+function getInitialTheme(): Theme {
   if (typeof window === "undefined") return "system";
   return (localStorage.getItem("siftara-theme") as Theme) || "system";
 }
@@ -29,18 +29,9 @@ function resolveTheme(t: Theme): "light" | "dark" {
   return t;
 }
 
-function subscribe(callback: () => void) {
-  if (typeof window === "undefined") return () => {};
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", callback);
-  return () => window.matchMedia("(prefers-color-scheme: dark)").removeEventListener("change", callback);
-}
-
-function getSnapshot() {
-  return getStoredTheme();
-}
-
-function getServerSnapshot() {
-  return "system" as Theme;
+function applyTheme(resolved: "light" | "dark") {
+  document.documentElement.classList.remove("light", "dark");
+  document.documentElement.classList.add(resolved);
 }
 
 export function useTheme() {
@@ -48,15 +39,32 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const resolvedTheme = resolveTheme(theme);
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(() => resolveTheme(getInitialTheme()));
 
   const setTheme = useCallback((t: Theme) => {
     localStorage.setItem("siftara-theme", t);
+    setThemeState(t);
     const r = resolveTheme(t);
-    document.documentElement.classList.remove("light", "dark");
-    document.documentElement.classList.add(r);
+    setResolvedTheme(r);
+    applyTheme(r);
   }, []);
+
+  useEffect(() => {
+    applyTheme(resolvedTheme);
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = () => {
+      const stored = localStorage.getItem("siftara-theme") as Theme;
+      if (stored === "system" || !stored) {
+        const r = resolveTheme("system");
+        setResolvedTheme(r);
+        applyTheme(r);
+      }
+    };
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, [resolvedTheme]);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
