@@ -49,3 +49,13 @@ wrangler.toml
 # agents
 AGENTS.md
 CLAUDE.md
+
+# loop memory (local/internal)
+docs/LOOP_STATE.md
+docs/PRODUCT_GAPS.md
+docs/DECISIONS.md
+docs/QA_CHECKLIST.md
+docs/UI_AUDIT.md
+docs/BACKEND_AUDIT.md
+docs/AI_AGENT_AUDIT.md
+docs/

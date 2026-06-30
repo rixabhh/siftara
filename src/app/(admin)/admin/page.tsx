@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Brain, Route, FileQuestion, Trophy, Users, Zap, ShieldCheck } from "lucide-react";
@@ -104,31 +105,31 @@ export default async function AdminPage() {
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-3">
             <Button variant="outline" className="justify-start gap-3 h-auto py-4" asChild>
-              <a href="/courses">
+              <Link href="/courses">
                 <Trophy className="h-5 w-5 text-amber-500" />
                 <div className="text-left">
                   <p className="font-medium">View Courses</p>
                   <p className="text-xs text-muted-foreground">Browse curated paths</p>
                 </div>
-              </a>
+              </Link>
             </Button>
             <Button variant="outline" className="justify-start gap-3 h-auto py-4" asChild>
-              <a href="/my-sift">
+              <Link href="/my-sift">
                 <Sparkles className="h-5 w-5 text-violet-500" />
                 <div className="text-left">
                   <p className="font-medium">Test My Sift</p>
                   <p className="text-xs text-muted-foreground">Try the Syft flow</p>
                 </div>
-              </a>
+              </Link>
             </Button>
             <Button variant="outline" className="justify-start gap-3 h-auto py-4" asChild>
-              <a href="/certificates/verify/SIFT-REACT-MASTERY-DEMO">
+              <Link href="/certificates/verify/SIFT-REACT-MASTERY-DEMO">
                 <ShieldCheck className="h-5 w-5 text-emerald-500" />
                 <div className="text-left">
                   <p className="font-medium">Verify Certificate</p>
                   <p className="text-xs text-muted-foreground">Check demo certificate</p>
                 </div>
-              </a>
+              </Link>
             </Button>
           </div>
         </CardContent>

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb, schema } from "@/lib/db";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
