@@ -70,6 +70,10 @@ export default async function CourseDetailPage({
             </span>
           </div>
 
+          <p className="text-xs text-muted-foreground">
+            Content by {course.sourceCreator} on YouTube. All video content belongs to the respective creator. Siftara provides the learning path, progress tracking, quizzes, assessments, and verification layer.
+          </p>
+
           <div className="flex flex-wrap gap-2">
             {course.skills.map((skill) => (
               <Badge key={skill} variant="secondary">

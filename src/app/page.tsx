@@ -20,10 +20,10 @@ import {
   Clock,
   Users,
   Play,
-  Star,
-  Target,
+  ShieldCheck,
   Shield,
   Flame,
+  Target,
 } from "lucide-react";
 
 export default function Home() {
@@ -79,25 +79,9 @@ export default function Home() {
                 ))}
               </div>
               <div className="mt-8 flex items-center gap-4">
-                <div className="flex -space-x-2">
-                  {["A", "B", "C", "D", "E"].map((letter, i) => (
-                    <div
-                      key={i}
-                      className="h-8 w-8 rounded-full border-2 border-background bg-muted flex items-center justify-center text-xs font-medium"
-                    >
-                      {letter}
-                    </div>
-                  ))}
-                </div>
-                <div className="text-sm">
-                  <div className="flex items-center gap-0.5 text-amber-500">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} className="h-3.5 w-3.5 fill-current" />
-                    ))}
-                  </div>
-                  <p className="text-muted-foreground">
-                    Loved by <strong className="text-foreground">2,500+</strong> learners
-                  </p>
+                <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/5 border border-emerald-500/10 px-3 py-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                  <span className="text-xs font-medium">Early access — free to start</span>
                 </div>
               </div>
             </FadeIn>
@@ -205,10 +189,10 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <FadeInStagger className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {[
-              { value: "2,500+", label: "Active Learners", icon: Users },
-              { value: "50+", label: "Curated Paths", icon: BookOpen },
-              { value: "800+", label: "Certificates", icon: Trophy },
-              { value: "4.8", label: "Avg Rating", icon: Star },
+              { value: "Free", label: "Curated Courses", icon: BookOpen },
+              { value: "Free", label: "Certificates", icon: Trophy },
+              { value: "1 Free", label: "My Sift", icon: Sparkles },
+              { value: "Public", label: "Verification", icon: ShieldCheck },
             ].map((stat) => (
               <StaggerItem key={stat.label}>
                 <Card className="border-border/50 text-center">
@@ -501,7 +485,7 @@ export default function Home() {
               Ready to transform how you learn?
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Join thousands of learners using Siftara to turn free content into real skills.
+              Start learning with structure. Free courses, free certificates, and one free My Sift.
             </p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Button size="lg" className="h-12 px-6" asChild>

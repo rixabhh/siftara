@@ -66,6 +66,11 @@ export function Footer() {
             <span>Verified proof.</span>
           </div>
         </div>
+        <div className="mt-6 border-t pt-6">
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Siftara is not affiliated with YouTube. Third-party video content belongs to its respective creators and platforms. Siftara provides learning structure, progress tracking, assessments, and certificate verification. Siftara Verified Certificates confirm completion and assessment within Siftara — they are not academic degrees, professional licenses, or endorsements by third-party creators, platforms, or institutions.
+          </p>
+        </div>
       </div>
     </footer>
   );
