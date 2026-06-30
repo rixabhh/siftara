@@ -1,9 +1,11 @@
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { notFound } from "next/navigation";
+import { Award, CheckCircle2, ExternalLink, Share2, ShieldCheck } from "lucide-react";
+import { getCertificateByCode } from "@/lib/db/seed";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Award, ExternalLink, Share2 } from "lucide-react";
 
 export default async function CertificateVerifyPage({
   params,
@@ -11,6 +13,15 @@ export default async function CertificateVerifyPage({
   params: Promise<{ code: string }>;
 }) {
   const { code } = await params;
+  const certificate = getCertificateByCode(code);
+
+  if (!certificate) notFound();
+
+  const issuedAt = new Intl.DateTimeFormat("en", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(certificate.issuedAt);
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6 lg:px-8">
@@ -22,38 +33,80 @@ export default async function CertificateVerifyPage({
               <Award className="h-7 w-7 text-primary" />
             </div>
             <Badge variant="secondary" className="mt-4 gap-1.5">
-              <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-              Siftara Verified
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              Siftara {certificate.trustLevel ?? "Verified"}
             </Badge>
             <h1 className="mt-4 text-xl font-bold">Certificate of Completion</h1>
             <p className="mt-1 text-sm text-muted-foreground">Awarded to</p>
-            <p className="mt-0.5 text-lg font-semibold">Learner Name</p>
+            <p className="mt-0.5 text-lg font-semibold">{certificate.learnerName}</p>
             <p className="mt-3 text-sm text-muted-foreground">for completing</p>
-            <p className="mt-0.5 text-lg font-semibold text-primary">Course Title</p>
+            <p className="mt-0.5 text-lg font-semibold text-primary">{certificate.title}</p>
           </div>
         </div>
 
         <CardContent className="p-6">
-          <div className="flex flex-wrap gap-1.5 mb-6">
-            {["React", "JavaScript", "Web Development"].map((skill) => (
-              <Badge key={skill} variant="secondary">{skill}</Badge>
+          <div className="mb-6 flex flex-wrap gap-1.5">
+            {certificate.skills.map((skill) => (
+              <Badge key={skill} variant="secondary">
+                {skill}
+              </Badge>
             ))}
           </div>
 
           <Separator className="mb-6" />
 
-          <div className="grid grid-cols-2 gap-4 text-sm mb-6">
-            <div>
-              <p className="text-muted-foreground">Issued</p>
-              <p className="font-medium">January 15, 2025</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Certificate ID</p>
-              <p className="font-medium font-mono text-xs">{code}</p>
+          <div className="mb-6 rounded-xl border bg-muted/30 p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-semibold">Trust score {certificate.trustScore ?? 100}%</p>
+                  {certificate.quizAverage && (
+                    <Badge variant="outline">Quiz avg {certificate.quizAverage}%</Badge>
+                  )}
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {certificate.verificationSummary ??
+                    "Verified through lesson completion, quiz checkpoints, and Siftara certificate policy checks."}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="flex gap-3">
+          <div className="mb-6 grid gap-4 text-sm sm:grid-cols-2">
+            <div>
+              <p className="text-muted-foreground">Issued</p>
+              <p className="font-medium">{issuedAt}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Certificate ID</p>
+              <p className="font-mono text-xs font-medium">{certificate.certificateCode}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Status</p>
+              <p className="flex items-center gap-1.5 font-medium capitalize">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+                {certificate.status}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Criteria</p>
+              <p className="font-medium">Strict certificate trust policy</p>
+            </div>
+          </div>
+
+          <div className="mb-6 space-y-2">
+            {(certificate.criteria ?? ["Required lessons completed", "Randomized quiz checkpoints passed"]).map((item) => (
+              <div key={item} className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2 text-sm">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row">
             <Button className="flex-1 gap-2">
               <Share2 className="h-4 w-4" />
               Share

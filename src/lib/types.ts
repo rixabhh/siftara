@@ -70,6 +70,11 @@ export interface Certificate {
   skills: string[];
   issuedAt: Date;
   status: string;
+  trustLevel?: string;
+  trustScore?: number;
+  quizAverage?: number;
+  verificationSummary?: string;
+  criteria?: string[];
 }
 
 export const categories = [

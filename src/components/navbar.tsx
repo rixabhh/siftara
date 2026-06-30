@@ -75,6 +75,8 @@ export function Navbar() {
           {[
             { href: "/dashboard", label: "Dashboard", show: isSignedIn },
             { href: "/my-sift", label: "My Sift", show: true },
+            { href: "/pricing", label: "Pricing", show: true },
+            { href: "/launch", label: "Launch", show: true },
             { href: "/certificates", label: "Certificates", show: isSignedIn },
           ]
             .filter((l) => l.show)
@@ -142,6 +144,8 @@ export function Navbar() {
                   { href: "/courses", label: "Explore" },
                   { href: "/dashboard", label: "Dashboard", show: isSignedIn },
                   { href: "/my-sift", label: "My Sift" },
+                  { href: "/pricing", label: "Pricing" },
+                  { href: "/launch", label: "Launch" },
                   { href: "/certificates", label: "Certificates", show: isSignedIn },
                 ]
                   .filter((l) => l.show !== false)

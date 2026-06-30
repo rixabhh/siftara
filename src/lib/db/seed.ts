@@ -1,4 +1,4 @@
-import type { Course, CourseModule, Lesson, Quiz, QuizQuestion } from "../types";
+import type { Certificate, Course, CourseModule, Lesson, Quiz, QuizQuestion } from "../types";
 
 export const seedCourses: Course[] = [
   {
@@ -94,9 +94,9 @@ export const seedLessons: Lesson[] = [
 ];
 
 export const seedQuizzes: Quiz[] = [
-  { id: "q1", courseId: "react-mastery", moduleId: "m1", title: "Module 1: React Basics Quiz", passScore: 70 },
-  { id: "q2", courseId: "react-mastery", moduleId: "m2", title: "Module 2: Components Quiz", passScore: 70 },
-  { id: "q3", courseId: "react-mastery", moduleId: "m3", title: "Module 3: Hooks Quiz", passScore: 70 },
+  { id: "q1", courseId: "react-mastery", moduleId: "m1", title: "Module 1: React Basics Quiz", passScore: 80 },
+  { id: "q2", courseId: "react-mastery", moduleId: "m2", title: "Module 2: Components Quiz", passScore: 80 },
+  { id: "q3", courseId: "react-mastery", moduleId: "m3", title: "Module 3: Hooks Quiz", passScore: 80 },
 ];
 
 export const seedQuizQuestions: QuizQuestion[] = [
@@ -114,6 +114,128 @@ export const seedQuizQuestions: QuizQuestion[] = [
     id: "qq3", quizId: "q1", questionText: "Which command creates a new React app?",
     options: ["npm create react-app", "npx create-react-app", "npm install react", "yarn add react"],
     correctAnswer: 1, explanation: "npx create-react-app is the standard way to bootstrap a new React project."
+  },
+  {
+    id: "qq10", quizId: "q1", questionText: "Why does React use a component model?",
+    options: ["To make UI reusable and composable", "To replace the browser", "To store passwords", "To avoid JavaScript"],
+    correctAnswer: 0, explanation: "Components let teams build interfaces from reusable pieces with clear responsibilities."
+  },
+  {
+    id: "qq11", quizId: "q1", questionText: "What does JSX most closely describe?",
+    options: ["HTML-like syntax inside JavaScript", "A database query language", "A network protocol", "A design file format"],
+    correctAnswer: 0, explanation: "JSX is HTML-like syntax that compiles into JavaScript calls."
+  },
+  {
+    id: "qq12", quizId: "q1", questionText: "Which value should a React component return?",
+    options: ["Renderable UI", "A SQL table", "A package lockfile", "A browser extension"],
+    correctAnswer: 0, explanation: "React components return renderable UI, usually expressed with JSX."
+  },
+  {
+    id: "qq4", quizId: "q2", questionText: "What is the main job of props in React?",
+    options: ["Store browser cookies", "Pass data into components", "Compile TypeScript", "Style global CSS"],
+    correctAnswer: 1, explanation: "Props pass data from a parent component into a child component."
+  },
+  {
+    id: "qq5", quizId: "q2", questionText: "Which pattern helps build flexible UI by nesting components?",
+    options: ["Component composition", "Database indexing", "Route prefetching", "Binary search"],
+    correctAnswer: 0, explanation: "Composition lets you combine small components into larger, reusable interfaces."
+  },
+  {
+    id: "qq6", quizId: "q2", questionText: "What should a reusable component usually avoid?",
+    options: ["Receiving props", "Rendering JSX", "Hard-coding every piece of content", "Using semantic HTML"],
+    correctAnswer: 2, explanation: "Reusable components stay flexible by accepting data and children instead of hard-coding every detail."
+  },
+  {
+    id: "qq13", quizId: "q2", questionText: "Which direction do props usually flow?",
+    options: ["Parent to child", "Child to database", "CSS to server", "Browser to package manager"],
+    correctAnswer: 0, explanation: "Props usually flow from parent components down into child components."
+  },
+  {
+    id: "qq14", quizId: "q2", questionText: "What is a good reason to split UI into smaller components?",
+    options: ["Clearer reuse and maintenance", "More duplicated code", "Less readable state", "Harder testing"],
+    correctAnswer: 0, explanation: "Smaller focused components are easier to reuse, test, and reason about."
+  },
+  {
+    id: "qq15", quizId: "q2", questionText: "What does children enable in a React component?",
+    options: ["Passing nested UI into a component", "Deleting all props", "Running SQL in JSX", "Changing the browser engine"],
+    correctAnswer: 0, explanation: "The children prop lets a parent pass nested UI into a component."
+  },
+  {
+    id: "qq7", quizId: "q3", questionText: "Which hook stores local component state?",
+    options: ["useEffect", "useState", "useMemo", "useRef"],
+    correctAnswer: 1, explanation: "useState gives a function component reactive local state."
+  },
+  {
+    id: "qq8", quizId: "q3", questionText: "When is useEffect most appropriate?",
+    options: ["For side effects after render", "For defining TypeScript types", "For replacing all props", "For writing CSS"],
+    correctAnswer: 0, explanation: "useEffect is used for side effects such as subscriptions, timers, and syncing with external systems."
+  },
+  {
+    id: "qq9", quizId: "q3", questionText: "Why create a custom hook?",
+    options: ["To hide broken code", "To reuse stateful logic", "To make components unable to render", "To disable React rules"],
+    correctAnswer: 1, explanation: "Custom hooks package reusable stateful logic behind a focused function API."
+  },
+  {
+    id: "qq16", quizId: "q3", questionText: "What should be included in an effect dependency list?",
+    options: ["Values used by the effect", "Random unused variables", "Only CSS class names", "The package version"],
+    correctAnswer: 0, explanation: "Dependencies should include reactive values used inside the effect."
+  },
+  {
+    id: "qq17", quizId: "q3", questionText: "Which rule applies to hooks?",
+    options: ["Call hooks at the top level", "Call hooks inside any loop", "Call hooks only after returns", "Rename every hook"],
+    correctAnswer: 0, explanation: "Hooks must be called at the top level of React functions or custom hooks."
+  },
+  {
+    id: "qq18", quizId: "q3", questionText: "What makes custom hooks recognizable to React tooling?",
+    options: ["Their name starts with use", "They return HTML files", "They contain only CSS", "They run outside React"],
+    correctAnswer: 0, explanation: "Custom hooks should start with use so React tooling can enforce hook rules."
+  },
+];
+
+export const seedCertificates: Certificate[] = [
+  {
+    id: "cert-react-mastery-demo",
+    certificateCode: "SIFT-REACT-MASTERY-DEMO",
+    userId: "demo-user",
+    courseId: "react-mastery",
+    learnerName: "Demo Learner",
+    title: "React Mastery",
+    skills: ["React", "JSX", "Hooks", "State Management", "Components"],
+    issuedAt: new Date("2026-06-30T00:00:00.000Z"),
+    status: "active",
+    trustLevel: "Verified",
+    trustScore: 100,
+    quizAverage: 92,
+    verificationSummary:
+      "Verified by completed lesson checkpoints, randomized quiz checkpoints, 92% average quiz performance, and learner reflection evidence.",
+    criteria: [
+      "100% required lessons completed",
+      "All module quiz checkpoints passed",
+      "Quiz average met the 80% certificate threshold",
+      "Reflection evidence submitted before certificate unlock",
+    ],
+  },
+  {
+    id: "cert-python-fundamentals-demo",
+    certificateCode: "SIFT-PYTHON-FUNDAMENTALS-DEMO",
+    userId: "demo-user",
+    courseId: "python-fundamentals",
+    learnerName: "Demo Learner",
+    title: "Python Fundamentals",
+    skills: ["Python", "Data Types", "Functions", "OOP"],
+    issuedAt: new Date("2026-06-30T00:00:00.000Z"),
+    status: "active",
+    trustLevel: "Verified",
+    trustScore: 100,
+    quizAverage: 88,
+    verificationSummary:
+      "Verified by completed lesson checkpoints, randomized quiz checkpoints, 88% average quiz performance, and learner reflection evidence.",
+    criteria: [
+      "100% required lessons completed",
+      "All module quiz checkpoints passed",
+      "Quiz average met the 80% certificate threshold",
+      "Reflection evidence submitted before certificate unlock",
+    ],
   },
 ];
 
@@ -135,4 +257,12 @@ export function getQuizByModule(moduleId: string): Quiz | undefined {
 
 export function getQuizQuestions(quizId: string): QuizQuestion[] {
   return seedQuizQuestions.filter(qq => qq.quizId === quizId);
+}
+
+export function getCertificateByCode(code: string): Certificate | undefined {
+  return seedCertificates.find((certificate) => certificate.certificateCode === code);
+}
+
+export function getDemoCertificateCode(courseId: string): string {
+  return `SIFT-${courseId.toUpperCase().replaceAll("-", "-")}-DEMO`;
 }

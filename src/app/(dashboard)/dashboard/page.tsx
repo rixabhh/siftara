@@ -1,39 +1,59 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { seedCourses } from "@/lib/db/seed";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { seedCertificates, seedCourses } from "@/lib/db/seed";
+import { learnerProfile } from "@/lib/growth/phase-data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
-  BookOpen,
-  Trophy,
-  Flame,
-  Zap,
   ArrowRight,
+  Award,
+  BookOpen,
+  CalendarDays,
   CheckCircle2,
-  Clock,
+  Flame,
+  Route,
+  ShieldCheck,
   Sparkles,
+  Trophy,
+  Zap,
 } from "lucide-react";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
+  const activeCourse = seedCourses[0];
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Welcome back!</h1>
-        <p className="mt-1 text-muted-foreground">What would you like to learn today?</p>
+      <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <Badge variant="secondary" className="mb-3 gap-1.5">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            Private beta cockpit
+          </Badge>
+          <h1 className="text-3xl font-bold tracking-tight">Today&apos;s learning plan</h1>
+          <p className="mt-1 text-muted-foreground">
+            Continue the next checkpoint, keep certificate trust high, and review what is coming next.
+          </p>
+        </div>
+        <Button asChild className="gap-2">
+          <Link href="/my-sift">
+            <Zap className="h-4 w-4" />
+            Create My Sift
+          </Link>
+        </Button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: "Active Courses", value: "0", icon: BookOpen, color: "text-emerald-500" },
-          { label: "Completed", value: "0", icon: CheckCircle2, color: "text-blue-500" },
-          { label: "Certificates", value: "0", icon: Trophy, color: "text-amber-500" },
-          { label: "Streak", value: "0 days", icon: Flame, color: "text-orange-500" },
+          { label: "Active paths", value: "3", icon: BookOpen, color: "text-emerald-500" },
+          { label: "Certificates", value: seedCertificates.length.toString(), icon: Trophy, color: "text-amber-500" },
+          { label: "Trust average", value: "96%", icon: ShieldCheck, color: "text-blue-500" },
+          { label: "Streak", value: "6 days", icon: Flame, color: "text-orange-500" },
         ].map((stat) => (
           <Card key={stat.label} className="border-border/50">
             <CardContent className="p-5">
@@ -47,34 +67,98 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3 mb-8">
-        <Card className="lg:col-span-2 border-border/50">
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="border-border/50 lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-lg">Continue Learning</CardTitle>
+            <CardTitle className="flex items-center justify-between gap-3 text-lg">
+              <span>Active SiftMap</span>
+              <Badge variant="outline">Certificate trust 72%</Badge>
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {seedCourses.slice(0, 3).map((course) => (
-                <Link key={course.id} href={`/learn/${course.id}`} className="group block">
-                  <div className="flex items-center gap-4 rounded-xl border p-4 hover:bg-muted/50 transition-colors">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                      <BookOpen className="h-6 w-6 text-primary" />
+            <div className="rounded-xl border bg-muted/30 p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">{activeCourse.title}</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Next: Module 2 quiz checkpoint. Pass randomized questions with 80%+ to keep certificate eligibility.
+                  </p>
+                </div>
+                <Button asChild className="gap-2">
+                  <Link href={`/learn/${activeCourse.id}`}>
+                    Resume
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+              <div className="mt-5">
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="font-medium">Path progress</span>
+                  <span className="text-muted-foreground">58%</span>
+                </div>
+                <Progress value={58} />
+              </div>
+              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                {[
+                  { label: "Lessons", value: "5/9", icon: CheckCircle2 },
+                  { label: "Quiz avg", value: "86%", icon: ShieldCheck },
+                  { label: "Reflection", value: "18/30 words", icon: Award },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-lg border bg-background p-3">
+                    <item.icon className="h-4 w-4 text-primary" />
+                    <p className="mt-2 text-sm font-semibold">{item.value}</p>
+                    <p className="text-xs text-muted-foreground">{item.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/50">
+          <CardHeader>
+            <CardTitle className="text-lg">My Sift Usage</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-xl border bg-primary/5 p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Free My Sift</span>
+                <Badge>1 available</Badge>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Credits unlock more personalized paths. Certificates stay free after trust checks.
+              </p>
+            </div>
+            <Button variant="outline" asChild className="w-full justify-start gap-3 h-auto py-4">
+              <Link href="/pricing">
+                <Sparkles className="h-5 w-5 text-violet-500" />
+                <div className="text-left">
+                  <p className="font-medium">Preview credit packs</p>
+                  <p className="text-xs text-muted-foreground">Phase 4 monetization readiness</p>
+                </div>
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/50 lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-lg">Recommended Next Paths</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {seedCourses.slice(1, 5).map((course) => (
+                <Link key={course.id} href={`/courses/${course.slug}`} className="group rounded-xl border p-4 transition hover:bg-muted/50">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-semibold group-hover:text-primary">{course.title}</h3>
+                      <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{course.description}</p>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold truncate group-hover:text-primary transition-colors">
-                          {course.title}
-                        </h3>
-                        <Badge variant="secondary" className="text-xs shrink-0">
-                          {course.difficulty}
-                        </Badge>
-                      </div>
-                      <div className="mt-2 flex items-center gap-3">
-                        <Progress value={0} className="h-1.5 flex-1" />
-                        <span className="text-xs text-muted-foreground shrink-0">0%</span>
-                      </div>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
+                    <Route className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary" />
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    <Badge variant="secondary">{course.difficulty}</Badge>
+                    <Badge variant="outline">Certificate</Badge>
                   </div>
                 </Link>
               ))}
@@ -84,48 +168,44 @@ export default async function DashboardPage() {
 
         <Card className="border-border/50">
           <CardHeader>
-            <CardTitle className="text-lg">Quick Actions</CardTitle>
+            <CardTitle className="text-lg">Public Proof</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-start gap-3 h-auto py-4" asChild>
-              <Link href="/my-sift">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 shrink-0">
-                  <Zap className="h-5 w-5 text-violet-500" />
+          <CardContent className="space-y-4">
+            <div className="rounded-xl border bg-muted/30 p-4">
+              <p className="font-medium">{learnerProfile.name}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{learnerProfile.headline}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {learnerProfile.publicStats.slice(0, 4).map((stat) => (
+                <div key={stat.label} className="rounded-lg border p-3">
+                  <p className="text-lg font-semibold">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground">{stat.label}</p>
                 </div>
-                <div className="text-left">
-                  <p className="font-medium">Create My Sift</p>
-                  <p className="text-xs text-muted-foreground">Turn any playlist into a course</p>
-                </div>
-              </Link>
-            </Button>
-            <Button variant="outline" className="w-full justify-start gap-3 h-auto py-4" asChild>
-              <Link href="/courses">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 shrink-0">
-                  <Sparkles className="h-5 w-5 text-emerald-500" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium">Explore Courses</p>
-                  <p className="text-xs text-muted-foreground">Browse curated learning paths</p>
-                </div>
+              ))}
+            </div>
+            <Button variant="outline" asChild className="w-full gap-2">
+              <Link href="/profile/demo">
+                View public profile
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="border-border/50">
+      <Card className="mt-6 border-border/50">
         <CardHeader>
-          <CardTitle className="text-lg">Upcoming</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <CalendarDays className="h-5 w-5 text-primary" />
+            Upcoming Beta Feedback Points
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
-              <Clock className="h-6 w-6 text-muted-foreground" />
+        <CardContent className="grid gap-3 sm:grid-cols-3">
+          {["After lesson usefulness", "Quiz relevance and difficulty", "Certificate share intent"].map((item) => (
+            <div key={item} className="rounded-xl border bg-muted/30 p-4 text-sm">
+              {item}
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Start a course to see your upcoming lessons and quizzes here.
-            </p>
-          </div>
+          ))}
         </CardContent>
       </Card>
     </div>

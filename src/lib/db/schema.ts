@@ -112,6 +112,7 @@ export const quizAttempts = sqliteTable("quiz_attempts", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id),
   quizId: text("quiz_id").notNull().references(() => quizzes.id),
+  variantId: text("variant_id"),
   score: integer("score").notNull(),
   passed: integer("passed", { mode: "boolean" }).notNull(),
   answersJson: text("answers_json"),
@@ -130,6 +131,9 @@ export const certificates = sqliteTable("certificates", {
   title: text("title").notNull(),
   skillsJson: text("skills_json"),
   scoreSummaryJson: text("score_summary_json"),
+  trustLevel: text("trust_level").notNull().default("verified"),
+  trustScore: integer("trust_score").notNull().default(0),
+  verificationSummary: text("verification_summary"),
   verificationUrl: text("verification_url"),
   issuedAt: integer("issued_at", { mode: "timestamp" }).notNull(),
   status: text("status").notNull().default("active"),
@@ -147,6 +151,8 @@ export const mySifts = sqliteTable("my_sifts", {
   difficulty: text("difficulty"),
   estimatedMinutes: integer("estimated_minutes"),
   roadmapJson: text("roadmap_json"),
+  scheduleJson: text("schedule_json"),
+  certificateEligibility: text("certificate_eligibility").notNull().default("pending"),
   status: text("status").notNull().default("created"),
   isFreeTrial: integer("is_free_trial", { mode: "boolean" }).notNull().default(false),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
@@ -157,14 +163,93 @@ export const aiAgentJobs = sqliteTable("ai_agent_jobs", {
   id: text("id").primaryKey(),
   userId: text("user_id").references(() => users.id),
   agentType: text("agent_type").notNull(),
+  relatedEntityType: text("related_entity_type"),
+  relatedEntityId: text("related_entity_id"),
+  inputHash: text("input_hash"),
   inputData: text("input_data"),
   outputData: text("output_data"),
   status: text("status").notNull().default("pending"),
   confidenceScore: real("confidence_score"),
+  requiresReview: integer("requires_review", { mode: "boolean" }).notNull().default(false),
   provider: text("provider"),
   model: text("model"),
   promptVersion: text("prompt_version"),
+  tokenUsage: integer("token_usage").notNull().default(0),
+  estimatedCost: real("estimated_cost").notNull().default(0),
   errorMessage: text("error_message"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   completedAt: integer("completed_at", { mode: "timestamp" }),
+});
+
+export const feedbackEvents = sqliteTable("feedback_events", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").references(() => users.id),
+  entityType: text("entity_type").notNull(),
+  entityId: text("entity_id").notNull(),
+  rating: integer("rating"),
+  difficulty: text("difficulty"),
+  comment: text("comment"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
+
+export const analyticsEvents = sqliteTable("analytics_events", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").references(() => users.id),
+  eventName: text("event_name").notNull(),
+  propertiesJson: text("properties_json"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
+
+export const payments = sqliteTable("payments", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id),
+  provider: text("provider").notNull(),
+  providerPaymentId: text("provider_payment_id"),
+  amount: integer("amount").notNull(),
+  currency: text("currency").notNull().default("USD"),
+  status: text("status").notNull().default("pending"),
+  productType: text("product_type").notNull(),
+  creditsAdded: integer("credits_added").notNull().default(0),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
+
+export const mySiftCredits = sqliteTable("my_sift_credits", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id),
+  availableCredits: integer("available_credits").notNull().default(0),
+  usedCredits: integer("used_credits").notNull().default(0),
+  source: text("source").notNull().default("free_trial"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+export const teams = sqliteTable("teams", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  ownerUserId: text("owner_user_id").notNull().references(() => users.id),
+  planType: text("plan_type").notNull().default("pilot"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+export const teamAssignments = sqliteTable("team_assignments", {
+  id: text("id").primaryKey(),
+  teamId: text("team_id").notNull().references(() => teams.id),
+  courseId: text("course_id").references(() => courses.id),
+  mySiftId: text("my_sift_id"),
+  title: text("title").notNull(),
+  dueAt: integer("due_at", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
+
+export const creatorSubmissions = sqliteTable("creator_submissions", {
+  id: text("id").primaryKey(),
+  creatorName: text("creator_name").notNull(),
+  creatorEmail: text("creator_email"),
+  sourceUrl: text("source_url").notNull(),
+  status: text("status").notNull().default("review"),
+  qualityScore: integer("quality_score"),
+  reviewNotes: text("review_notes"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });

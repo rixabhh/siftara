@@ -74,11 +74,13 @@ export default async function AdminPage() {
           <CardTitle className="text-lg">AI Agent Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[
               { name: "Sift Check", status: "ready" },
               { name: "Curriculum Builder", status: "ready" },
               { name: "Quiz Generator", status: "ready" },
+              { name: "Assessment Variants", status: "ready" },
+              { name: "Certificate Trust Review", status: "ready" },
               { name: "Roadmap Builder", status: "ready" },
             ].map((agent) => (
               <div key={agent.name} className="flex items-center gap-3 rounded-xl border p-3">

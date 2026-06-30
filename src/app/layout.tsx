@@ -19,8 +19,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://siftara.com"),
   title: {
-    default: "Siftara — Learn from the best free courses without getting lost",
+    default: "Siftara - Learn from the best free courses without getting lost",
     template: "%s | Siftara",
   },
   description:
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://siftara.com",
     siteName: "Siftara",
-    title: "Siftara — Learn from the best free courses without getting lost",
+    title: "Siftara - Learn from the best free courses without getting lost",
     description: "AI-guided learning paths from free content. Roadmaps, quizzes, progress tracking, and free certificates.",
     images: [
       {
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Siftara — Learn from the best free courses without getting lost",
+    title: "Siftara - Learn from the best free courses without getting lost",
     description: "AI-guided learning paths from free content. Roadmaps, quizzes, progress tracking, and free certificates.",
     images: ["/og-image.png"],
   },

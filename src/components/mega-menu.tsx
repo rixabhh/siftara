@@ -69,7 +69,7 @@ const features = [
   },
   {
     title: "Certificates",
-    description: "Earn free, verified certificates after completing paths.",
+    description: "Free proof unlocked only after trust-policy checks.",
     icon: Trophy,
     href: "/certificates",
     color: "text-amber-500",
@@ -82,6 +82,14 @@ const features = [
     href: "/courses",
     color: "text-violet-500",
     bg: "bg-violet-500/10",
+  },
+  {
+    title: "Teams",
+    description: "Assign paths and track trusted completions for cohorts.",
+    icon: Megaphone,
+    href: "/teams",
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
   },
 ];
 
