@@ -135,13 +135,22 @@ export default async function AdminPage() {
           <CardTitle className="text-lg">Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Button variant="outline" className="justify-start gap-3 h-auto py-4" asChild>
               <Link href="/admin/courses/new">
                 <Sparkles className="h-5 w-5 text-violet-500" />
                 <div className="text-left">
                   <p className="font-medium">Create Course</p>
                   <p className="text-xs text-muted-foreground">Add new curated content</p>
+                </div>
+              </Link>
+            </Button>
+            <Button variant="outline" className="justify-start gap-3 h-auto py-4" asChild>
+              <Link href="/admin/certificates">
+                <ShieldCheck className="h-5 w-5 text-emerald-500" />
+                <div className="text-left">
+                  <p className="font-medium">Certificates</p>
+                  <p className="text-xs text-muted-foreground">View and manage issued</p>
                 </div>
               </Link>
             </Button>
