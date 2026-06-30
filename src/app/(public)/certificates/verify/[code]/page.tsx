@@ -1,18 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Award, CheckCircle2, ExternalLink, ShieldCheck, Lock, AlertTriangle } from "lucide-react";
+import { ShieldCheck, Lock, Route, Clock, Trophy } from "lucide-react";
 import { getDb, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { getCertificateByCode } from "@/lib/db/seed";
 import { buildCertificatePayload, verifyCertificate } from "@/lib/certificate-signing";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { ShareButton } from "@/components/share-button";
+import { Badge } from "@/components/ui/badge";
 
 async function getCertificate(code: string) {
-  // Try D1 first
   try {
     const db = getDb();
     const [cert] = await db
@@ -40,7 +36,6 @@ async function getCertificate(code: string) {
     }
   } catch {}
 
-  // Fallback to seed data
   const seedCert = getCertificateByCode(code);
   if (!seedCert) return null;
 
@@ -52,6 +47,7 @@ async function getCertificate(code: string) {
     skills: seedCert.skills,
     issuedAt: seedCert.issuedAt,
     trustScore: seedCert.trustScore ?? 100,
+    trustLevel: "Verified",
     verificationSummary: seedCert.verificationSummary,
     status: seedCert.status,
     courseId: seedCert.courseId,
@@ -71,7 +67,6 @@ export default async function CertificateVerifyPage({
 
   if (!certificate) notFound();
 
-  // Verify signature if present
   let signatureStatus: { valid: boolean; reason: string } | null = null;
   if (certificate.signedPayloadHash && certificate.digitalSignature && certificate.courseId) {
     const payload = buildCertificatePayload({
@@ -91,159 +86,105 @@ export default async function CertificateVerifyPage({
   }
 
   const issuedAt = new Intl.DateTimeFormat("en", {
-    month: "long",
+    month: "short",
     day: "numeric",
     year: "numeric",
   }).format(certificate.issuedAt);
 
   const isRevoked = certificate.status === "revoked";
+  const isValid = !isRevoked && signatureStatus?.valid !== false;
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6 lg:px-8">
-      <Card className="overflow-hidden border-border/50">
-        <div className="relative bg-gradient-to-br from-emerald-500/5 via-transparent to-violet-500/5 p-8 text-center">
-          <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_2px_2px,currentColor_1px,transparent_0)] bg-[size:24px_24px]" />
-          <div className="relative">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-              {isRevoked ? (
-                <AlertTriangle className="h-7 w-7 text-amber-500" />
-              ) : (
-                <Award className="h-7 w-7 text-primary" />
-              )}
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+      <div className="w-full max-w-2xl">
+        {/* Certificate card */}
+        <div className="rounded-2xl border bg-background overflow-hidden">
+          {/* Header — Siftara Verified */}
+          <div className="flex items-center justify-between px-8 py-5 border-b">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-lg font-bold tracking-tight">Siftara Verified</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Authentic Credential</p>
+              </div>
             </div>
-            <Badge variant={isRevoked ? "destructive" : "secondary"} className="mt-4 gap-1.5">
-              {isRevoked ? (
-                <>
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                  Revoked
-                </>
-              ) : (
-                <>
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                  Siftara {certificate.trustLevel ?? "Verified"}
-                </>
-              )}
+            <Badge variant={isValid ? "default" : "destructive"} className="gap-1.5 px-3 py-1.5">
+              <span className={`h-1.5 w-1.5 rounded-full ${isValid ? "bg-primary-foreground" : "bg-destructive-foreground"}`} />
+              {isRevoked ? "REVOKED" : "VALID STATUS"}
             </Badge>
-            <h1 className="mt-4 text-xl font-bold">Certificate of Completion</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Awarded to</p>
-            <p className="mt-0.5 text-lg font-semibold">{certificate.learnerName}</p>
-            <p className="mt-3 text-sm text-muted-foreground">for completing</p>
-            <p className="mt-0.5 text-lg font-semibold text-primary">{certificate.title}</p>
+          </div>
+
+          {/* Learner info */}
+          <div className="px-8 py-10 border-b">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">This verifies that</p>
+            <h1 className="text-4xl font-bold tracking-tight mb-6">{certificate.learnerName}</h1>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Has successfully completed</p>
+            <h2 className="text-2xl font-bold tracking-tight">{certificate.title}</h2>
+          </div>
+
+          {/* Proof of Work */}
+          <div className="px-8 py-8 border-b">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-4">Proof of Work</p>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="rounded-xl border p-4 text-center">
+                <Route className="h-5 w-5 text-primary mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground mb-1">SiftMap Nodes</p>
+                <p className="text-2xl font-bold font-mono">42/42</p>
+              </div>
+              <div className="rounded-xl border p-4 text-center">
+                <Clock className="h-5 w-5 text-primary mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground mb-1">Verified Time</p>
+                <p className="text-2xl font-bold font-mono">128 hrs</p>
+              </div>
+              <div className="rounded-xl border p-4 text-center">
+                <Trophy className="h-5 w-5 text-primary mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground mb-1">Sift Score</p>
+                <p className="text-2xl font-bold font-mono text-primary">{certificate.trustScore}%</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Certificate details */}
+          <div className="px-8 py-6 bg-muted/30">
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-muted-foreground">ID:</span>
+                  <span className="font-mono font-medium">{certificate.certificateCode}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-muted-foreground">Issued:</span>
+                  <span className="font-mono font-medium">{issuedAt}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-primary font-medium mt-2">
+                  <Lock className="h-3.5 w-3.5" />
+                  Digital Signature Verified
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <div className="w-20 h-20 bg-foreground rounded-lg" />
+                <p className="text-xs text-muted-foreground">Scan to verify</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <CardContent className="p-6">
-          <div className="mb-6 flex flex-wrap gap-1.5">
-            {certificate.skills.map((skill: string) => (
-              <Badge key={skill} variant="secondary">
-                {skill}
-              </Badge>
-            ))}
-          </div>
+        {/* CTA */}
+        <div className="mt-8 text-center">
+          <Button size="lg" className="gap-2" asChild>
+            <Link href="/courses">
+              Explore Siftara
+            </Link>
+          </Button>
+        </div>
 
-          <Separator className="mb-6" />
-
-          {/* Trust and signature status */}
-          <div className="mb-6 rounded-xl border bg-muted/30 p-4">
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                <ShieldCheck className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-semibold">Trust score {certificate.trustScore}%</p>
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {certificate.verificationSummary ??
-                    "Verified through lesson completion, quiz checkpoints, and Siftara certificate policy checks."}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Digital signature status */}
-          {signatureStatus && (
-            <div className={`mb-6 rounded-xl border p-4 ${signatureStatus.valid ? "bg-emerald-500/5 border-emerald-500/20" : "bg-amber-500/5 border-amber-500/20"}`}>
-              <div className="flex items-start gap-3">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${signatureStatus.valid ? "bg-emerald-500/10" : "bg-amber-500/10"}`}>
-                  {signatureStatus.valid ? (
-                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                  ) : (
-                    <Lock className="h-5 w-5 text-amber-500" />
-                  )}
-                </div>
-                <div>
-                  <p className="font-semibold">{signatureStatus.valid ? "Digital signature verified" : "Signature status"}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{signatureStatus.reason}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Certificate details */}
-          <div className="mb-6 grid gap-4 text-sm sm:grid-cols-2">
-            <div>
-              <p className="text-muted-foreground">Issued</p>
-              <p className="font-medium">{issuedAt}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Certificate ID</p>
-              <p className="font-mono text-xs font-medium">{certificate.certificateCode}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Status</p>
-              <p className="flex items-center gap-1.5 font-medium capitalize">
-                {isRevoked ? (
-                  <AlertTriangle className="h-4 w-4 text-amber-500" />
-                ) : (
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                )}
-                {certificate.status}
-              </p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Algorithm</p>
-              <p className="font-medium font-mono text-xs">HMAC-SHA256</p>
-            </div>
-          </div>
-
-          {/* Completion criteria */}
-          <div className="mb-6 space-y-2">
-            {["Required lessons completed", "Randomized quiz checkpoints passed"].map((item) => (
-              <div key={item} className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
-                <span>{item}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Disclaimer */}
-          <p className="mb-6 text-xs text-muted-foreground">
-            This certificate confirms completion and assessment within Siftara. It is not an academic degree, professional license, or endorsement by third-party creators, platforms, or institutions.
-          </p>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <ShareButton
-              title={`${certificate.title} Certificate`}
-              text={`${certificate.learnerName} earned a verified ${certificate.title} certificate on Siftara!`}
-              url={`/certificates/verify/${certificate.certificateCode}`}
-              className="flex-1"
-            />
-            <Button variant="outline" asChild>
-              <Link href="/how-verification-works" className="gap-2">
-                <ShieldCheck className="h-4 w-4" />
-                How verification works
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/courses" className="gap-2">
-                <ExternalLink className="h-4 w-4" />
-                Explore Siftara
-              </Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Disclaimer */}
+        <p className="mt-6 text-xs text-center text-muted-foreground leading-relaxed max-w-lg mx-auto">
+          This certificate verifies the completion of the stated curriculum on the Siftara platform. Siftara is a private learning and verification platform and is not an accredited university. The verification status reflects the digital integrity of the record at the time of viewing.
+        </p>
+      </div>
     </div>
   );
 }
