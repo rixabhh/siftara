@@ -135,6 +135,12 @@ export const certificates = sqliteTable("certificates", {
   trustScore: integer("trust_score").notNull().default(0),
   verificationSummary: text("verification_summary"),
   verificationUrl: text("verification_url"),
+  criteriaVersion: text("criteria_version").notNull().default("v1"),
+  signedPayloadHash: text("signed_payload_hash"),
+  digitalSignature: text("digital_signature"),
+  signatureAlgorithm: text("signature_algorithm").notNull().default("hmac-sha256"),
+  revokedAt: integer("revoked_at", { mode: "timestamp" }),
+  revocationReason: text("revocation_reason"),
   issuedAt: integer("issued_at", { mode: "timestamp" }).notNull(),
   status: text("status").notNull().default("active"),
 });

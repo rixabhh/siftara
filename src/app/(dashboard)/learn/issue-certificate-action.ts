@@ -4,6 +4,7 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { getDb, schema } from "@/lib/db";
 import { eq, and } from "drizzle-orm";
 import { getCertificateTrustSummary } from "@/lib/learning/trust";
+import { buildCertificatePayload, signCertificate } from "@/lib/certificate-signing";
 
 export interface IssueCertificateInput {
   courseId: string;
@@ -43,6 +44,18 @@ export async function issueCertificate(input: IssueCertificateInput) {
     const id = crypto.randomUUID();
     const code = `SIFT-${input.courseId.toUpperCase().replace(/[^A-Z0-9]/g, "-")}-${Date.now().toString(36).toUpperCase()}`;
 
+    // Build payload and sign
+    const payload = buildCertificatePayload({
+      id,
+      certificateCode: code,
+      learnerName,
+      courseId: input.courseId,
+      title: input.courseTitle,
+      skillsJson: JSON.stringify(input.skills),
+      issuedAt: now,
+    });
+    const { signature, payloadHash } = await signCertificate(payload);
+
     await db.insert(schema.certificates).values({
       id,
       certificateCode: code,
@@ -57,6 +70,10 @@ export async function issueCertificate(input: IssueCertificateInput) {
       trustScore: input.trustScore,
       verificationSummary: getCertificateTrustSummary(input.quizAverage),
       verificationUrl: `/certificates/verify/${code}`,
+      criteriaVersion: "v1",
+      signedPayloadHash: payloadHash,
+      digitalSignature: signature,
+      signatureAlgorithm: "hmac-sha256",
       issuedAt: now,
       status: "active",
     });
