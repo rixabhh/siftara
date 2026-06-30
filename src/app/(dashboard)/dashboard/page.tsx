@@ -1,8 +1,9 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { seedCertificates, seedCourses } from "@/lib/db/seed";
-import { learnerProfile } from "@/lib/growth/phase-data";
+import { getDb, schema } from "@/lib/db";
+import { eq } from "drizzle-orm";
+import { seedCourses } from "@/lib/db/seed";
 import { ensureUserExists } from "@/lib/db/user-sync";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,10 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
   ArrowRight,
-  Award,
   BookOpen,
   CalendarDays,
-  CheckCircle2,
   Flame,
   Route,
   ShieldCheck,
@@ -22,23 +21,64 @@ import {
   Zap,
 } from "lucide-react";
 
+async function getDashboardData(userId: string) {
+  let enrollments: Array<{ courseId: string; progressPercentage: number; status: string }> = [];
+  let certificates: Array<{ title: string; trustScore: number; courseTitle?: string }> = [];
+  let courses: Array<{ id: string; title: string; slug: string; description: string; difficulty: string; certificateEnabled: boolean }> = [];
+
+  try {
+    const db = getDb();
+    [enrollments, certificates, courses] = await Promise.all([
+      db.select().from(schema.enrollments).where(eq(schema.enrollments.userId, userId)),
+      db.select().from(schema.certificates).where(eq(schema.certificates.userId, userId)),
+      db.select().from(schema.courses).where(eq(schema.courses.status, "published")),
+    ]);
+  } catch {}
+
+  return { enrollments, certificates, courses };
+}
+
 export default async function DashboardPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  // Sync user to D1 on visit (ensures user exists for API calls)
+  // Sync user to D1 on visit
+  let userName = "Learner";
   try {
     const client = await clerkClient();
     const user = await client.users.getUser(userId);
+    userName = [user.firstName, user.lastName].filter(Boolean).join(" ") || "Learner";
     await ensureUserExists({
       id: userId,
       email: user.emailAddresses?.[0]?.emailAddress ?? "",
-      name: [user.firstName, user.lastName].filter(Boolean).join(" ") || "Learner",
+      name: userName,
       avatarUrl: user.imageUrl,
     });
   } catch {}
 
-  const activeCourse = seedCourses[0];
+  const { enrollments, certificates, courses } = await getDashboardData(userId);
+
+  // Compute stats
+  const activeEnrollments = enrollments.filter((e) => e.status === "active");
+  const avgProgress = activeEnrollments.length > 0
+    ? Math.round(activeEnrollments.reduce((sum, e) => sum + e.progressPercentage, 0) / activeEnrollments.length)
+    : 0;
+  const avgTrust = certificates.length > 0
+    ? Math.round(certificates.reduce((sum, c) => sum + (c.trustScore ?? 0), 0) / certificates.length)
+    : 0;
+
+  // Get most recent active enrollment for "active SiftMap"
+  const activeEnrollment = activeEnrollments[0];
+  const activeCourse = activeEnrollment
+    ? courses.find((c) => c.id === activeEnrollment.courseId) ?? seedCourses[0]
+    : seedCourses[0];
+  const activeProgress = activeEnrollment?.progressPercentage ?? 0;
+
+  // Recommendations: courses not enrolled in
+  const enrolledCourseIds = new Set(enrollments.map((e) => e.courseId));
+  const recommendations = courses.length > 0
+    ? courses.filter((c) => !enrolledCourseIds.has(c.id)).slice(0, 4)
+    : seedCourses.slice(1, 5);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -48,7 +88,7 @@ export default async function DashboardPage() {
             <ShieldCheck className="h-3.5 w-3.5" />
             Private beta cockpit
           </Badge>
-          <h1 className="text-3xl font-bold tracking-tight">Today&apos;s learning plan</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Welcome back, {userName}</h1>
           <p className="mt-1 text-muted-foreground">
             Continue the next checkpoint, keep certificate trust high, and review what is coming next.
           </p>
@@ -63,10 +103,10 @@ export default async function DashboardPage() {
 
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: "Active paths", value: "3", icon: BookOpen, color: "text-emerald-500" },
-          { label: "Certificates", value: seedCertificates.length.toString(), icon: Trophy, color: "text-amber-500" },
-          { label: "Trust average", value: "96%", icon: ShieldCheck, color: "text-blue-500" },
-          { label: "Streak", value: "6 days", icon: Flame, color: "text-orange-500" },
+          { label: "Active paths", value: activeEnrollments.length.toString(), icon: BookOpen, color: "text-emerald-500" },
+          { label: "Certificates", value: certificates.length.toString(), icon: Trophy, color: "text-amber-500" },
+          { label: "Avg progress", value: `${avgProgress}%`, icon: ShieldCheck, color: "text-blue-500" },
+          { label: "Trust average", value: avgTrust > 0 ? `${avgTrust}%` : "—", icon: Flame, color: "text-orange-500" },
         ].map((stat) => (
           <Card key={stat.label} className="border-border/50">
             <CardContent className="p-5">
@@ -84,8 +124,10 @@ export default async function DashboardPage() {
         <Card className="border-border/50 lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center justify-between gap-3 text-lg">
-              <span>Active SiftMap</span>
-              <Badge variant="outline">Certificate trust 72%</Badge>
+              <span>{activeEnrollment ? "Active SiftMap" : "Start Learning"}</span>
+              {activeEnrollment && (
+                <Badge variant="outline">Progress {activeProgress}%</Badge>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -94,36 +136,27 @@ export default async function DashboardPage() {
                 <div>
                   <h2 className="text-xl font-semibold">{activeCourse.title}</h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Next: Module 2 quiz checkpoint. Pass randomized questions with 80%+ to keep certificate eligibility.
+                    {activeEnrollment
+                      ? `Continue learning — ${activeProgress}% complete.`
+                      : "Pick a course to start your learning journey."}
                   </p>
                 </div>
                 <Button asChild className="gap-2">
-                  <Link href={`/learn/${activeCourse.id}`}>
-                    Resume
+                  <Link href={activeEnrollment ? `/learn/${activeCourse.id}` : `/courses`}>
+                    {activeEnrollment ? "Resume" : "Explore"}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
               </div>
-              <div className="mt-5">
-                <div className="mb-2 flex items-center justify-between text-sm">
-                  <span className="font-medium">Path progress</span>
-                  <span className="text-muted-foreground">58%</span>
-                </div>
-                <Progress value={58} />
-              </div>
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                {[
-                  { label: "Lessons", value: "5/9", icon: CheckCircle2 },
-                  { label: "Quiz avg", value: "86%", icon: ShieldCheck },
-                  { label: "Reflection", value: "18/30 words", icon: Award },
-                ].map((item) => (
-                  <div key={item.label} className="rounded-lg border bg-background p-3">
-                    <item.icon className="h-4 w-4 text-primary" />
-                    <p className="mt-2 text-sm font-semibold">{item.value}</p>
-                    <p className="text-xs text-muted-foreground">{item.label}</p>
+              {activeEnrollment && (
+                <div className="mt-5">
+                  <div className="mb-2 flex items-center justify-between text-sm">
+                    <span className="font-medium">Path progress</span>
+                    <span className="text-muted-foreground">{activeProgress}%</span>
                   </div>
-                ))}
-              </div>
+                  <Progress value={activeProgress} />
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -160,7 +193,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2">
-              {seedCourses.slice(1, 5).map((course) => (
+              {recommendations.map((course) => (
                 <Link key={course.id} href={`/courses/${course.slug}`} className="group rounded-xl border p-4 transition hover:bg-muted/50">
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -171,7 +204,7 @@ export default async function DashboardPage() {
                   </div>
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     <Badge variant="secondary">{course.difficulty}</Badge>
-                    <Badge variant="outline">Certificate</Badge>
+                    {course.certificateEnabled && <Badge variant="outline">Certificate</Badge>}
                   </div>
                 </Link>
               ))}
@@ -185,23 +218,22 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-xl border bg-muted/30 p-4">
-              <p className="font-medium">{learnerProfile.name}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{learnerProfile.headline}</p>
+              <p className="font-medium">{userName}</p>
+              <p className="mt-1 text-sm text-muted-foreground">Frontend learner building verified proof with Siftara.</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {learnerProfile.publicStats.slice(0, 4).map((stat) => (
+              {[
+                { label: "Completed paths", value: certificates.length.toString() },
+                { label: "Certificates", value: certificates.length.toString() },
+                { label: "Active paths", value: activeEnrollments.length.toString() },
+                { label: "Avg progress", value: `${avgProgress}%` },
+              ].map((stat) => (
                 <div key={stat.label} className="rounded-lg border p-3">
                   <p className="text-lg font-semibold">{stat.value}</p>
                   <p className="text-xs text-muted-foreground">{stat.label}</p>
                 </div>
               ))}
             </div>
-            <Button variant="outline" asChild className="w-full gap-2">
-              <Link href="/profile/demo">
-                View public profile
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
           </CardContent>
         </Card>
       </div>
