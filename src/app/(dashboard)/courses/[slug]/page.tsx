@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Play, Clock, BookOpen, Award, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Play, Clock, BookOpen, Award, CheckCircle2, ShieldCheck } from "lucide-react";
 
 export default async function CourseDetailPage({
   params,
@@ -19,8 +19,9 @@ export default async function CourseDetailPage({
     return (
       <div className="mx-auto max-w-7xl px-4 py-16 text-center">
         <h1 className="text-2xl font-bold">Course not found</h1>
+        <p className="mt-2 text-sm text-muted-foreground">This learning path does not exist yet.</p>
         <Button variant="outline" asChild className="mt-4">
-          <Link href="/courses">Back to courses</Link>
+          <Link href="/courses">Browse paths</Link>
         </Button>
       </div>
     );
@@ -34,12 +35,13 @@ export default async function CourseDetailPage({
       <Button variant="ghost" size="sm" asChild className="mb-6">
         <Link href="/courses" className="gap-2">
           <ArrowLeft className="h-4 w-4" />
-          All Courses
+          All paths
         </Link>
       </Button>
 
       <div className="grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-8">
+          {/* Header */}
           <div>
             <div className="flex flex-wrap gap-2 mb-4">
               <Badge variant="secondary">{course.category}</Badge>
@@ -47,14 +49,15 @@ export default async function CourseDetailPage({
               {course.certificateEnabled && (
                 <Badge variant="outline" className="gap-1">
                   <Award className="h-3 w-3" />
-                  Certificate
+                  Free certificate
                 </Badge>
               )}
             </div>
-            <h1 className="text-3xl font-bold tracking-tight">{course.title}</h1>
-            <p className="mt-3 text-muted-foreground leading-relaxed">{course.description}</p>
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{course.title}</h1>
+            <p className="mt-4 text-muted-foreground leading-relaxed text-lg">{course.description}</p>
           </div>
 
+          {/* Quick stats */}
           <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <Clock className="h-4 w-4" />
@@ -66,26 +69,45 @@ export default async function CourseDetailPage({
             </span>
             <span className="flex items-center gap-1.5">
               <Play className="h-4 w-4" />
-              {course.sourceCreator}
+              {modules.length} modules
             </span>
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            Content by {course.sourceCreator} on YouTube. All video content belongs to the respective creator. Siftara provides the learning path, progress tracking, quizzes, assessments, and verification layer.
-          </p>
-
-          <div className="flex flex-wrap gap-2">
-            {course.skills.map((skill) => (
-              <Badge key={skill} variant="secondary">
-                {skill}
-              </Badge>
-            ))}
+          {/* Skills */}
+          <div>
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Skills covered</h2>
+            <div className="flex flex-wrap gap-2">
+              {course.skills.map((skill) => (
+                <Badge key={skill} variant="secondary">
+                  {skill}
+                </Badge>
+              ))}
+            </div>
           </div>
+
+          {/* Source attribution */}
+          <Card className="border-border/50 bg-muted/30">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <Play className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">Source: {course.sourceCreator} on YouTube</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    All video content belongs to the respective creator. Siftara provides the learning path, progress tracking, quizzes, assessments, and verification layer.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           <Separator />
 
+          {/* Roadmap */}
           <div>
-            <h2 className="text-xl font-semibold mb-4">Course Roadmap</h2>
+            <h2 className="text-xl font-semibold mb-2">Course roadmap</h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              {modules.length} modules with {totalLessons} lessons and checkpoint quizzes.
+            </p>
             <div className="space-y-4">
               {modules.map((module, idx) => {
                 const lessons = getLessonsByModule(module.id);
@@ -120,9 +142,10 @@ export default async function CourseDetailPage({
                           </div>
                         ))}
                         {quiz && (
-                          <div className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm bg-violet-500/5 text-violet-600 dark:text-violet-400">
+                          <div className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm bg-accent-violet/5 text-accent-violet dark:text-accent-violet">
                             <CheckCircle2 className="h-3.5 w-3.5" />
                             <span className="font-medium">{quiz.title}</span>
+                            <Badge variant="outline" className="text-xs ml-auto">Checkpoint</Badge>
                           </div>
                         )}
                       </div>
@@ -134,16 +157,39 @@ export default async function CourseDetailPage({
           </div>
         </div>
 
+        {/* Sidebar */}
         <div className="lg:col-span-1">
-          <div className="sticky top-20">
+          <div className="sticky top-20 space-y-6">
+            {/* Start CTA */}
             <Card className="border-border/50">
               <CardContent className="p-6">
-                <h3 className="font-semibold mb-4">Certificate Requirements</h3>
+                <form action={enrollInCourse.bind(null, course.id)}>
+                  <Button type="submit" className="w-full gap-2 h-12">
+                    <Play className="h-4 w-4" />
+                    Start path
+                  </Button>
+                </form>
+                <p className="mt-3 text-xs text-muted-foreground text-center">
+                  Free to start. No credit card required.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Certificate requirements */}
+            <Card className="border-border/50">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Earn a certificate</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Complete the required checkpoints to earn a free Siftara Verified Certificate.
+                </p>
                 <ul className="space-y-3">
                   {[
-                    "Complete at least 80% of lessons",
-                    "Pass all module quizzes with 70%+",
-                    "Complete the final assessment",
+                    "Complete all required lessons",
+                    "Pass each module quiz (70%+)",
+                    "Write a learning reflection",
                   ].map((req) => (
                     <li key={req} className="flex items-start gap-2 text-sm">
                       <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
@@ -151,13 +197,26 @@ export default async function CourseDetailPage({
                     </li>
                   ))}
                 </ul>
-                <Separator className="my-4" />
-                <form action={enrollInCourse.bind(null, course.id)}>
-                  <Button type="submit" className="w-full gap-2">
-                    <Play className="h-4 w-4" />
-                    Start Learning
-                  </Button>
-                </form>
+              </CardContent>
+            </Card>
+
+            {/* What you'll learn */}
+            <Card className="border-border/50">
+              <CardContent className="p-6">
+                <h3 className="font-semibold mb-3">What you will learn</h3>
+                <ul className="space-y-2">
+                  {[
+                    "Follow a structured learning path",
+                    "Test knowledge with checkpoint quizzes",
+                    "Track your progress through modules",
+                    "Earn a verifiable certificate",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0 shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
               </CardContent>
             </Card>
           </div>

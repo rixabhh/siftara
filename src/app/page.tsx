@@ -24,7 +24,7 @@ export default function Home() {
     <div className="flex flex-col">
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/60 via-transparent to-transparent dark:from-emerald-950/20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
 
         <div className="relative mx-auto max-w-7xl px-4 pt-20 pb-24 sm:px-6 sm:pt-28 sm:pb-32 lg:px-8">
           <div className="max-w-3xl">
