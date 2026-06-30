@@ -75,8 +75,7 @@ export function Navbar() {
           {[
             { href: "/dashboard", label: "Dashboard", show: isSignedIn },
             { href: "/my-sift", label: "My Sift", show: true },
-            { href: "/pricing", label: "Pricing", show: true },
-            { href: "/launch", label: "Launch", show: true },
+            { href: "/how-verification-works", label: "How Verification Works", show: true },
             { href: "/certificates", label: "Certificates", show: isSignedIn },
           ]
             .filter((l) => l.show)
@@ -117,7 +116,7 @@ export function Navbar() {
                 <Link href="/sign-in">Sign in</Link>
               </Button>
               <Button size="sm" asChild>
-                <Link href="/sign-up">Get Started</Link>
+                <Link href="/sign-up">Start learning</Link>
               </Button>
             </div>
           )}
@@ -144,8 +143,7 @@ export function Navbar() {
                   { href: "/courses", label: "Explore" },
                   { href: "/dashboard", label: "Dashboard", show: isSignedIn },
                   { href: "/my-sift", label: "My Sift" },
-                  { href: "/pricing", label: "Pricing" },
-                  { href: "/launch", label: "Launch" },
+                  { href: "/how-verification-works", label: "How Verification Works" },
                   { href: "/certificates", label: "Certificates", show: isSignedIn },
                 ]
                   .filter((l) => l.show !== false)
@@ -180,7 +178,7 @@ export function Navbar() {
                       <Link href="/sign-in" onClick={() => setMobileOpen(false)}>Sign in</Link>
                     </Button>
                     <Button asChild>
-                      <Link href="/sign-up" onClick={() => setMobileOpen(false)}>Get Started</Link>
+                      <Link href="/sign-up" onClick={() => setMobileOpen(false)}>Start learning</Link>
                     </Button>
                   </motion.div>
                 )}
