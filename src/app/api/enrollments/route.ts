@@ -1,15 +1,19 @@
 import { NextResponse } from "next/server";
 import { getDb, schema } from "@/lib/db";
 import { eq, and } from "drizzle-orm";
+import { requireAuth, isAuthError } from "@/lib/auth";
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const userId = searchParams.get("userId");
-  const courseId = searchParams.get("courseId");
-
-  if (!userId) {
-    return NextResponse.json({ error: "userId is required" }, { status: 400 });
+  let userId: string;
+  try {
+    userId = await requireAuth();
+  } catch (e) {
+    if (isAuthError(e)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    throw e;
   }
+
+  const { searchParams } = new URL(request.url);
+  const courseId = searchParams.get("courseId");
 
   try {
     const db = getDb();
@@ -24,11 +28,19 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const { userId, courseId } = body;
+  let userId: string;
+  try {
+    userId = await requireAuth();
+  } catch (e) {
+    if (isAuthError(e)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    throw e;
+  }
 
-  if (!userId || !courseId) {
-    return NextResponse.json({ error: "userId and courseId are required" }, { status: 400 });
+  const body = await request.json();
+  const { courseId } = body;
+
+  if (!courseId) {
+    return NextResponse.json({ error: "courseId is required" }, { status: 400 });
   }
 
   try {

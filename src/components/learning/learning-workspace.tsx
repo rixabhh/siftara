@@ -132,9 +132,7 @@ export function LearningWorkspace({ course, modules }: LearningWorkspaceProps) {
       setHasHydrated(true);
 
       // Also fetch progress from D1 (best-effort merge)
-      const userId = localStorage.getItem("siftara-user-id");
-      if (userId) {
-        api.progress.get(userId, course.id).then((data) => {
+      api.progress.get(course.id).then((data) => {
           if (data?.lessons?.length) {
             setCompletedLessons((prev) => {
               const merged = new Set(prev);
@@ -154,7 +152,6 @@ export function LearningWorkspace({ course, modules }: LearningWorkspaceProps) {
             });
           }
         }).catch(() => {});
-      }
     });
   }, [quizzes, storageKey, course.id]);
 
@@ -175,10 +172,7 @@ export function LearningWorkspace({ course, modules }: LearningWorkspaceProps) {
     setCompletedLessons((current) => new Set(current).add(lessonId));
     // Persist to API (best-effort, non-blocking)
     try {
-      const userId = localStorage.getItem("siftara-user-id");
-      if (userId) {
-        api.progress.update(userId, course.id, lessonId, "completed").catch(() => {});
-      }
+      api.progress.update(course.id, lessonId, "completed").catch(() => {});
     } catch {}
   }
 
@@ -203,15 +197,11 @@ export function LearningWorkspace({ course, modules }: LearningWorkspaceProps) {
     }
     // Persist quiz attempt to API (best-effort, non-blocking)
     try {
-      const userId = localStorage.getItem("siftara-user-id");
-      if (userId) {
-        api.quizzes.submit(quizId, {
-          userId,
-          score,
-          passed,
-          variantId: activeQuizVariant?.variantId,
-        }).catch(() => {});
-      }
+      api.quizzes.submit(quizId, {
+        score,
+        passed,
+        variantId: activeQuizVariant?.variantId,
+      }).catch(() => {});
     } catch {}
   }
 

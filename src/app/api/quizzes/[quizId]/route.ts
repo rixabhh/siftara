@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
+import { requireAuth, isAuthError } from "@/lib/auth";
 
 export async function GET(
   _request: Request,
@@ -26,12 +27,20 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ quizId: string }> }
 ) {
+  let userId: string;
+  try {
+    userId = await requireAuth();
+  } catch (e) {
+    if (isAuthError(e)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    throw e;
+  }
+
   const { quizId } = await params;
   const body = await request.json();
-  const { userId, score, passed, answersJson, variantId } = body;
+  const { score, passed, answersJson, variantId } = body;
 
-  if (!userId || score === undefined || passed === undefined) {
-    return NextResponse.json({ error: "userId, score, and passed are required" }, { status: 400 });
+  if (score === undefined || passed === undefined) {
+    return NextResponse.json({ error: "score and passed are required" }, { status: 400 });
   }
 
   try {

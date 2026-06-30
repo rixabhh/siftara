@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 import { getDb, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
+import { requireAuth, isAuthError } from "@/lib/auth";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const userId = searchParams.get("userId");
-
-  if (!userId) {
-    return NextResponse.json({ error: "userId is required" }, { status: 400 });
+export async function GET() {
+  let userId: string;
+  try {
+    userId = await requireAuth();
+  } catch (e) {
+    if (isAuthError(e)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    throw e;
   }
 
   try {
@@ -20,11 +22,19 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const { userId, sourceUrl, title, description, educationalScore, difficulty, estimatedMinutes, roadmapJson, scheduleJson, certificateEligibility, isFreeTrial } = body;
+  let userId: string;
+  try {
+    userId = await requireAuth();
+  } catch (e) {
+    if (isAuthError(e)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    throw e;
+  }
 
-  if (!userId || !sourceUrl) {
-    return NextResponse.json({ error: "userId and sourceUrl are required" }, { status: 400 });
+  const body = await request.json();
+  const { sourceUrl, title, description, educationalScore, difficulty, estimatedMinutes, roadmapJson, scheduleJson, certificateEligibility, isFreeTrial } = body;
+
+  if (!sourceUrl) {
+    return NextResponse.json({ error: "sourceUrl is required" }, { status: 400 });
   }
 
   try {

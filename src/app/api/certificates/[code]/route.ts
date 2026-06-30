@@ -21,12 +21,34 @@ export async function GET(
       return NextResponse.json({ error: "Certificate not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ certificate });
+    // Only return public-safe fields (no userId, no internal IDs)
+    return NextResponse.json({
+      certificateCode: certificate.certificateCode,
+      learnerName: certificate.learnerName,
+      title: certificate.title,
+      skillsJson: certificate.skillsJson,
+      trustLevel: certificate.trustLevel,
+      trustScore: certificate.trustScore,
+      verificationSummary: certificate.verificationSummary,
+      issuedAt: certificate.issuedAt,
+      status: certificate.status,
+    });
   } catch {
     const certificate = getCertificateByCode(code);
     if (!certificate) {
       return NextResponse.json({ error: "Certificate not found" }, { status: 404 });
     }
-    return NextResponse.json({ certificate, fallback: true });
+    // Return public-safe fields from seed data
+    return NextResponse.json({
+      certificateCode: certificate.certificateCode,
+      learnerName: certificate.learnerName,
+      title: certificate.title,
+      skills: certificate.skills,
+      trustScore: certificate.trustScore,
+      verificationSummary: certificate.verificationSummary,
+      issuedAt: certificate.issuedAt,
+      status: certificate.status,
+      fallback: true,
+    });
   }
 }

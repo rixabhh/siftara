@@ -1,14 +1,22 @@
 import { NextResponse } from "next/server";
 import { getDb, schema } from "@/lib/db";
 import { eq, and } from "drizzle-orm";
+import { requireAuth, isAuthError } from "@/lib/auth";
 
 export async function GET(request: Request) {
+  let userId: string;
+  try {
+    userId = await requireAuth();
+  } catch (e) {
+    if (isAuthError(e)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    throw e;
+  }
+
   const { searchParams } = new URL(request.url);
-  const userId = searchParams.get("userId");
   const courseId = searchParams.get("courseId");
 
-  if (!userId || !courseId) {
-    return NextResponse.json({ error: "userId and courseId are required" }, { status: 400 });
+  if (!courseId) {
+    return NextResponse.json({ error: "courseId is required" }, { status: 400 });
   }
 
   try {
@@ -31,11 +39,19 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const { userId, courseId, lessonId, status, watchedSeconds } = body;
+  let userId: string;
+  try {
+    userId = await requireAuth();
+  } catch (e) {
+    if (isAuthError(e)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    throw e;
+  }
 
-  if (!userId || !courseId || !lessonId) {
-    return NextResponse.json({ error: "userId, courseId, and lessonId are required" }, { status: 400 });
+  const body = await request.json();
+  const { courseId, lessonId, status, watchedSeconds } = body;
+
+  if (!courseId || !lessonId) {
+    return NextResponse.json({ error: "courseId and lessonId are required" }, { status: 400 });
   }
 
   try {

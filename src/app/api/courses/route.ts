@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb, schema } from "@/lib/db";
 import { seedCourses } from "@/lib/db/seed";
+import { requireAuth, isAuthError } from "@/lib/auth";
 
 export async function GET() {
   try {
@@ -13,6 +14,14 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  let userId: string;
+  try {
+    userId = await requireAuth();
+  } catch (e) {
+    if (isAuthError(e)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    throw e;
+  }
+
   const body = await request.json();
   const { title, slug, description, category, difficulty, estimatedMinutes, sourceCreator, sourceUrl } = body;
 
@@ -36,7 +45,7 @@ export async function POST(request: Request) {
       sourceCreator: sourceCreator ?? null,
       sourceUrl: sourceUrl ?? null,
       status: "draft",
-      createdBy: null,
+      createdBy: userId,
       createdAt: now,
       updatedAt: now,
     });

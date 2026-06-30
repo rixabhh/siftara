@@ -26,26 +26,26 @@ export const api = {
   },
 
   enrollments: {
-    list: (userId: string, courseId?: string) =>
+    list: (courseId?: string) =>
       fetchAPI<{ enrollments: Array<{ id: string; courseId: string; status: string; progressPercentage: number }> }>(
-        `/api/enrollments?userId=${userId}${courseId ? `&courseId=${courseId}` : ""}`
+        `/api/enrollments${courseId ? `?courseId=${courseId}` : ""}`
       ),
-    create: (userId: string, courseId: string) =>
+    create: (courseId: string) =>
       fetchAPI<{ enrollment: { id: string; courseId: string; status: string } }>("/api/enrollments", {
         method: "POST",
-        body: JSON.stringify({ userId, courseId }),
+        body: JSON.stringify({ courseId }),
       }),
   },
 
   progress: {
-    get: (userId: string, courseId: string) =>
+    get: (courseId: string) =>
       fetchAPI<{ lessons: Array<{ lessonId: string; status: string }>; quizzes: Array<{ quizId: string; score: number; passed: boolean }> }>(
-        `/api/progress?userId=${userId}&courseId=${courseId}`
+        `/api/progress?courseId=${courseId}`
       ),
-    update: (userId: string, courseId: string, lessonId: string, status: string) =>
+    update: (courseId: string, lessonId: string, status: string) =>
       fetchAPI<{ progressPercentage: number; completedCount: number }>("/api/progress", {
         method: "POST",
-        body: JSON.stringify({ userId, courseId, lessonId, status }),
+        body: JSON.stringify({ courseId, lessonId, status }),
       }),
   },
 
@@ -54,7 +54,7 @@ export const api = {
       fetchAPI<{ quiz: { id: string; title: string; passScore: number }; questions: Array<{ id: string; questionText: string; options: string[]; correctAnswer: number; explanation: string }> }>(
         `/api/quizzes/${quizId}`
       ),
-    submit: (quizId: string, data: { userId: string; score: number; passed: boolean; answersJson?: unknown; variantId?: string }) =>
+    submit: (quizId: string, data: { score: number; passed: boolean; answersJson?: unknown; variantId?: string }) =>
       fetchAPI<{ attemptId: string; score: number; passed: boolean }>(`/api/quizzes/${quizId}`, {
         method: "POST",
         body: JSON.stringify(data),
@@ -62,27 +62,22 @@ export const api = {
   },
 
   certificates: {
-    list: (userId: string, courseId?: string) =>
+    list: (courseId?: string) =>
       fetchAPI<{ certificates: Array<{ id: string; certificateCode: string; title: string; learnerName: string; skills: string[]; issuedAt: string; trustScore: number; status: string }> }>(
-        `/api/certificates?userId=${userId}${courseId ? `&courseId=${courseId}` : ""}`
+        `/api/certificates${courseId ? `?courseId=${courseId}` : ""}`
       ),
     verify: (code: string) =>
-      fetchAPI<{ certificate: { id: string; certificateCode: string; title: string; learnerName: string; skills: string[]; issuedAt: string; trustScore: number; status: string } }>(
+      fetchAPI<{ certificateCode: string; learnerName: string; title: string; skills: string[]; trustScore: number; issuedAt: string; status: string }>(
         `/api/certificates/${code}`
       ),
-    issue: (data: { userId: string; courseId: string; learnerName: string; title: string; skills: string[]; quizAverage: number; trustScore: number }) =>
-      fetchAPI<{ certificateCode: string; id: string }>("/api/certificates", {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
   },
 
   mySift: {
-    list: (userId: string) =>
+    list: () =>
       fetchAPI<{ mySifts: Array<{ id: string; sourceUrl: string; title: string; status: string; educationalScore: number | null }> }>(
-        `/api/my-sift?userId=${userId}`
+        `/api/my-sift`
       ),
-    create: (data: { userId: string; sourceUrl: string; title?: string; description?: string; educationalScore?: number; difficulty?: string; estimatedMinutes?: number; roadmapJson?: unknown; scheduleJson?: unknown; certificateEligibility?: string; isFreeTrial?: boolean }) =>
+    create: (data: { sourceUrl: string; title?: string; description?: string; educationalScore?: number; difficulty?: string; estimatedMinutes?: number; roadmapJson?: unknown; scheduleJson?: unknown; certificateEligibility?: string; isFreeTrial?: boolean }) =>
       fetchAPI<{ mySiftId: string }>("/api/my-sift", {
         method: "POST",
         body: JSON.stringify(data),
@@ -90,22 +85,22 @@ export const api = {
   },
 
   ai: {
-    siftCheck: (input: { url: string; title?: string; description?: string; channelName?: string; userId?: string }) =>
+    siftCheck: (input: { url: string; title?: string; description?: string; channelName?: string }) =>
       fetchAPI<{ jobId: string; result: { score: number; status: string; reason: string; signals: string[] } }>("/api/ai", {
         method: "POST",
         body: JSON.stringify({ agentType: "sift-check", input }),
       }),
-    buildCurriculum: (input: { url: string; title?: string; description?: string; userId?: string }) =>
+    buildCurriculum: (input: { url: string; title?: string; description?: string }) =>
       fetchAPI<{ jobId: string; result: { title: string; description: string; modules: Array<{ title: string; lessons: Array<{ title: string }> }> } }>("/api/ai", {
         method: "POST",
         body: JSON.stringify({ agentType: "curriculum-builder", input }),
       }),
-    generateQuiz: (input: { moduleTitle: string; moduleDescription: string; lessonTitles: string[]; questionCount?: number; userId?: string }) =>
+    generateQuiz: (input: { moduleTitle: string; moduleDescription: string; lessonTitles: string[]; questionCount?: number }) =>
       fetchAPI<{ jobId: string; result: { questions: Array<{ questionText: string; options: string[]; correctAnswer: number; explanation: string }> } }>("/api/ai", {
         method: "POST",
         body: JSON.stringify({ agentType: "quiz-generator", input }),
       }),
-    buildRoadmap: (input: { courseTitle: string; modules: Array<{ id: string; title: string; lessons: Array<{ id: string; title: string }> }>; userId?: string }) =>
+    buildRoadmap: (input: { courseTitle: string; modules: Array<{ id: string; title: string; lessons: Array<{ id: string; title: string }> }> }) =>
       fetchAPI<{ jobId: string; result: { nodes: Array<{ id: string; title: string; type: string }>; checkpoints: Array<{ afterModule: number; title: string }> } }>("/api/ai", {
         method: "POST",
         body: JSON.stringify({ agentType: "roadmap-builder", input }),
