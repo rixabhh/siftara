@@ -91,6 +91,8 @@ npm run lint
 |----------|-------------|----------|
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key | Yes |
 | `CLERK_SECRET_KEY` | Clerk secret key | Yes |
+| `CLERK_WEBHOOK_SECRET` | Clerk webhook secret | Yes |
+| `CERTIFICATE_SIGNING_SECRET` | Certificate signing secret (32+ chars) | Yes |
 | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | Sign-in page URL | No |
 | `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | Sign-up page URL | No |
 | `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` | Redirect after sign-in | No |
@@ -139,6 +141,9 @@ siftara/
 | `/dashboard` | User dashboard with progress |
 | `/certificates` | User certificates |
 | `/certificates/verify/[code]` | Public certificate verification |
+| `/how-verification-works` | How Siftara verifies learning |
+| `/terms` | Terms of service |
+| `/privacy` | Privacy policy |
 | `/admin` | Admin panel |
 | `/sign-in` | Clerk sign-in |
 | `/sign-up` | Clerk sign-up |
