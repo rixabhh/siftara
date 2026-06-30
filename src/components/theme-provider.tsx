@@ -11,14 +11,14 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: "system",
+  theme: "light",
   setTheme: () => {},
   resolvedTheme: "light",
 });
 
 function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "system";
-  return (localStorage.getItem("siftara-theme") as Theme) || "system";
+  if (typeof window === "undefined") return "light";
+  return (localStorage.getItem("siftara-theme") as Theme) || "light";
 }
 
 function resolveTheme(t: Theme): "light" | "dark" {
