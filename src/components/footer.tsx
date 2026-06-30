@@ -6,7 +6,7 @@ const footerLinks = {
     { href: "/courses", label: "Explore Courses" },
     { href: "/my-sift", label: "My Sift" },
     { href: "/certificates", label: "Certificates" },
-    { href: "/pricing", label: "Pricing" },
+    { href: "/how-verification-works", label: "How Verification Works" },
   ],
   resources: [
     { href: "/launch", label: "Launch Kit" },
