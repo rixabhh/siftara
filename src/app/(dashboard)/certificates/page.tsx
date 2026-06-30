@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { Award, ExternalLink, Share2, ShieldCheck } from "lucide-react";
+import { Award, ExternalLink, ShieldCheck } from "lucide-react";
 import { getDb, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { seedCertificates } from "@/lib/db/seed";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ShareButton } from "@/components/share-button";
 
 async function getCertificates(userId: string) {
   try {
@@ -96,10 +97,12 @@ export default async function CertificatesPage() {
                   <span className="font-mono">{certificate.certificateCode}</span>
                 </div>
                 <div className="mt-5 flex gap-2">
-                  <Button className="flex-1 gap-2">
-                    <Share2 className="h-4 w-4" />
-                    Share
-                  </Button>
+                  <ShareButton
+                    title={`${certificate.title} Certificate`}
+                    text={`I earned a verified ${certificate.title} certificate on Siftara!`}
+                    url={`${typeof window !== "undefined" ? window.location.origin : ""}/certificates/verify/${certificate.certificateCode}`}
+                    className="flex-1"
+                  />
                   <Button variant="outline" asChild>
                     <Link href={`/certificates/verify/${certificate.certificateCode}`} className="gap-2">
                       <ExternalLink className="h-4 w-4" />

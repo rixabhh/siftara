@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Award, CheckCircle2, ExternalLink, Share2, ShieldCheck } from "lucide-react";
+import { Award, CheckCircle2, ExternalLink, ShieldCheck } from "lucide-react";
 import { getCertificateByCode } from "@/lib/db/seed";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { ShareButton } from "@/components/share-button";
 
 export default async function CertificateVerifyPage({
   params,
@@ -107,10 +108,12 @@ export default async function CertificateVerifyPage({
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button className="flex-1 gap-2">
-              <Share2 className="h-4 w-4" />
-              Share
-            </Button>
+            <ShareButton
+              title={`${certificate.title} Certificate`}
+              text={`${certificate.learnerName} earned a verified ${certificate.title} certificate on Siftara!`}
+              url={`/certificates/verify/${certificate.certificateCode}`}
+              className="flex-1"
+            />
             <Button variant="outline" asChild>
               <Link href="/courses" className="gap-2">
                 <ExternalLink className="h-4 w-4" />

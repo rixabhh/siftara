@@ -1,4 +1,5 @@
-import { Award, ExternalLink, Share2 } from "lucide-react";
+import { Award, ExternalLink } from "lucide-react";
+import { ShareButton } from "@/components/share-button";
 
 interface CertificateCardProps {
   learnerName: string;
@@ -38,10 +39,12 @@ export function CertificateCard({ learnerName, courseName, skills, issuedAt, cer
         </div>
 
         <div className="mt-4 flex gap-2">
-          <button className="flex-1 inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark transition-colors">
-            <Share2 className="h-4 w-4" />
-            Share
-          </button>
+          <ShareButton
+            title={`${courseName} Certificate`}
+            text={`${learnerName} earned a verified ${courseName} certificate on Siftara!`}
+            url={`/certificates/verify/${certificateCode}`}
+            className="flex-1"
+          />
           <button className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground hover:bg-surface-soft transition-colors">
             <ExternalLink className="h-4 w-4" />
             Verify
