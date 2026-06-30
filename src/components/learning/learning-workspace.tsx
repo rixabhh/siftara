@@ -130,8 +130,33 @@ export function LearningWorkspace({ course, modules, certificateCode }: Learning
         setQuizAttemptSeeds(createInitialQuizSeeds(quizzes));
       }
       setHasHydrated(true);
+
+      // Also fetch progress from D1 (best-effort merge)
+      const userId = localStorage.getItem("siftara-user-id");
+      if (userId) {
+        api.progress.get(userId, course.id).then((data) => {
+          if (data?.lessons?.length) {
+            setCompletedLessons((prev) => {
+              const merged = new Set(prev);
+              data.lessons.forEach((l) => {
+                if (l.status === "completed") merged.add(l.lessonId);
+              });
+              return merged;
+            });
+          }
+          if (data?.quizzes?.length) {
+            setPassedQuizzes((prev) => {
+              const merged = { ...prev };
+              data.quizzes.forEach((q) => {
+                if (q.passed) merged[q.quizId] = q.score;
+              });
+              return merged;
+            });
+          }
+        }).catch(() => {});
+      }
     });
-  }, [quizzes, storageKey]);
+  }, [quizzes, storageKey, course.id]);
 
   useEffect(() => {
     if (!hasHydrated) return;

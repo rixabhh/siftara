@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getDb, schema } from "@/lib/db";
 import { seedCourses } from "@/lib/db/seed";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,8 +13,31 @@ const categoryColors: Record<string, string> = {
   Marketing: "bg-pink-500/10 text-pink-600 dark:text-pink-400",
 };
 
-export default function CoursesPage() {
-  const courses = seedCourses;
+async function getCourses() {
+  try {
+    const db = getDb();
+    const courses = await db.select().from(schema.courses);
+    if (courses.length > 0) {
+      return courses.map((c) => ({
+        id: c.id,
+        title: c.title,
+        slug: c.slug,
+        description: c.description,
+        category: c.categoryId ?? "Development",
+        difficulty: c.difficulty,
+        estimatedMinutes: c.estimatedMinutes,
+        skills: [] as string[],
+        certificateEnabled: c.certificateEnabled,
+        sourceCreator: c.sourceCreator ?? "",
+        status: c.status,
+      }));
+    }
+  } catch {}
+  return seedCourses;
+}
+
+export default async function CoursesPage() {
+  const courses = await getCourses();
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

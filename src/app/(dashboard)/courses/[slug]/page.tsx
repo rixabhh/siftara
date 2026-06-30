@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getCourseBySlug, getModulesByCourse, getLessonsByModule, getQuizByModule } from "@/lib/db/seed";
+import { enrollInCourse } from "../enroll-action";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -147,12 +148,12 @@ export default async function CourseDetailPage({
                   ))}
                 </ul>
                 <Separator className="my-4" />
-                <Button className="w-full gap-2" asChild>
-                  <Link href={`/learn/${course.id}`}>
+                <form action={enrollInCourse.bind(null, course.id)}>
+                  <Button type="submit" className="w-full gap-2">
                     <Play className="h-4 w-4" />
                     Start Learning
-                  </Link>
-                </Button>
+                  </Button>
+                </form>
               </CardContent>
             </Card>
           </div>
