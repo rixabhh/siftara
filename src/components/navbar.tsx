@@ -8,15 +8,21 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SiftaraLogo } from "@/components/siftara-logo";
 import { Menu, X, Search, Route } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { MegaMenu } from "@/components/mega-menu";
 
 export function Navbar() {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [megaOpen, setMegaOpen] = useState(false);
+
+  const openMega = useCallback(() => setMegaOpen(true), []);
+  const closeMega = useCallback(() => setMegaOpen(false), []);
 
   return (
+    <>
     <header className="sticky top-0 z-50 w-full border-b bg-background/90 backdrop-blur-xl">
       <div className="mx-auto flex h-[60px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2 group">
@@ -28,8 +34,8 @@ export function Navbar() {
 
         {/* Desktop nav — centered */}
         <nav className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+            <MegaMenu open={megaOpen} onOpen={openMega} onClose={closeMega} />
             {[
-            { href: "/courses", label: "Paths" },
             { href: "/my-sift", label: "My Sift" },
             { href: "/how-verification-works", label: "Proof" },
             { href: "/certificates", label: "Certificates", show: isSignedIn },
@@ -144,5 +150,6 @@ export function Navbar() {
         </div>
       </div>
     </header>
+    </>
   );
 }
