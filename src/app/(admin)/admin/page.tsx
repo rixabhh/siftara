@@ -1,16 +1,31 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { getDb, schema } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ensureUserExists } from "@/lib/db/user-sync";
-import { Sparkles, Brain, Route, FileQuestion, Trophy, Users, Zap, ShieldCheck } from "lucide-react";
+import { Sparkles, Brain, Route, FileQuestion, Users, Zap, ShieldCheck } from "lucide-react";
+
+async function getAdminStats() {
+  let courses = 0;
+  let published = 0;
+  let learners = 0;
+  try {
+    const db = getDb();
+    const allCourses = await db.select().from(schema.courses);
+    courses = allCourses.length;
+    published = allCourses.filter((c) => c.status === "published").length;
+    const users = await db.select().from(schema.users);
+    learners = users.length;
+  } catch {}
+  return { courses, published, drafts: courses - published, learners };
+}
 
 export default async function AdminPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  // Sync user to D1 on visit
   try {
     const client = await clerkClient();
     const user = await client.users.getUser(userId);
@@ -22,6 +37,8 @@ export default async function AdminPage() {
     });
   } catch {}
 
+  const stats = await getAdminStats();
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8">
@@ -31,10 +48,10 @@ export default async function AdminPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         {[
-          { label: "Published", value: "5", icon: Route, color: "text-emerald-500" },
-          { label: "Drafts", value: "0", icon: FileQuestion, color: "text-amber-500" },
+          { label: "Published", value: stats.published.toString(), icon: Route, color: "text-emerald-500" },
+          { label: "Drafts", value: stats.drafts.toString(), icon: FileQuestion, color: "text-amber-500" },
           { label: "Syft Jobs", value: "0", icon: Brain, color: "text-violet-500" },
-          { label: "Total Learners", value: "0", icon: Users, color: "text-blue-500" },
+          { label: "Total Learners", value: stats.learners.toString(), icon: Users, color: "text-blue-500" },
         ].map((stat) => (
           <Card key={stat.label} className="border-border/50">
             <CardContent className="p-5">
@@ -51,13 +68,15 @@ export default async function AdminPage() {
       <div className="grid gap-6 sm:grid-cols-2 mb-8">
         <Card className="border-border/50">
           <CardHeader>
-            <CardTitle className="text-lg">Course Builder</CardTitle>
+            <CardTitle className="text-lg">Course Management</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">Create new courses manually or with Syft assistance.</p>
-            <Button className="gap-2">
-              <Sparkles className="h-4 w-4" />
-              Create New Course
+            <p className="text-sm text-muted-foreground mb-4">Create, edit, and publish courses.</p>
+            <Button className="gap-2" asChild>
+              <Link href="/admin/courses">
+                <Route className="h-4 w-4" />
+                Manage Courses
+              </Link>
             </Button>
           </CardContent>
         </Card>
@@ -118,11 +137,11 @@ export default async function AdminPage() {
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-3">
             <Button variant="outline" className="justify-start gap-3 h-auto py-4" asChild>
-              <Link href="/courses">
-                <Trophy className="h-5 w-5 text-amber-500" />
+              <Link href="/admin/courses/new">
+                <Sparkles className="h-5 w-5 text-violet-500" />
                 <div className="text-left">
-                  <p className="font-medium">View Courses</p>
-                  <p className="text-xs text-muted-foreground">Browse curated paths</p>
+                  <p className="font-medium">Create Course</p>
+                  <p className="text-xs text-muted-foreground">Add new curated content</p>
                 </div>
               </Link>
             </Button>
