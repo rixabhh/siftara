@@ -3,10 +3,10 @@ import { SiftaraLogo } from "@/components/siftara-logo";
 
 const footerLinks = {
   product: [
-    { href: "/courses", label: "Explore Paths" },
+    { href: "/courses", label: "Learning Paths" },
     { href: "/my-sift", label: "My Sift" },
     { href: "/certificates", label: "Certificates" },
-    { href: "/how-verification-works", label: "How Verification Works" },
+    { href: "/how-verification-works", label: "Verification Rules" },
   ],
   legal: [
     { href: "/terms", label: "Terms" },
@@ -16,7 +16,7 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="border-t bg-muted/30">
+    <footer className="border-t bg-surface/70">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-3">
           <div className="col-span-2 md:col-span-1">
@@ -24,8 +24,8 @@ export function Footer() {
               <SiftaraLogo className="h-7 w-7" />
               <span className="text-lg font-bold">Siftara</span>
             </Link>
-            <p className="mt-4 text-sm text-muted-foreground max-w-xs">
-              Curated learning paths from free content. Checkpoints, progress, and free verified certificates.
+            <p className="mt-4 max-w-xs text-sm text-muted-foreground">
+              A calm learning layer for free courses: paths, checkpoints, progress, and verifiable proof.
             </p>
           </div>
 
@@ -37,7 +37,7 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {link.label}
                     </Link>
@@ -49,8 +49,8 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t pt-8">
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Siftara is not affiliated with YouTube. Third-party video content belongs to its respective creators and platforms. Siftara provides learning structure, progress tracking, assessments, and certificate verification. Siftara Verified Certificates confirm completion and assessment within Siftara — they are not academic degrees, professional licenses, or endorsements by third-party creators, platforms, or institutions.
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            Siftara is not affiliated with YouTube. Third-party video content belongs to its respective creators and platforms. Siftara provides learning structure, progress tracking, assessments, and certificate verification. Siftara Verified Certificates confirm completion and assessment within Siftara; they are not academic degrees, professional licenses, or endorsements by third-party creators, platforms, or institutions.
           </p>
           <p className="mt-4 text-xs text-muted-foreground">
             &copy; {new Date().getFullYear()} Siftara. All rights reserved.

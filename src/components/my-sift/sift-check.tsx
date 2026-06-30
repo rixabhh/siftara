@@ -20,11 +20,11 @@ export function SiftCheck({ url, onComplete }: SiftCheckProps) {
   const [phase, setPhase] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const phases = [
-    "Syft is checking title...",
-    "Syft is analyzing description...",
-    "Syft is evaluating playlist structure...",
-    "Syft is assessing learning intent...",
-    "Syft is scoring suitability...",
+    "Checking the link",
+    "Looking for learning signals",
+    "Reading playlist structure",
+    "Testing certificate eligibility",
+    "Preparing the Sift Score",
   ];
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export function SiftCheck({ url, onComplete }: SiftCheckProps) {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Syft check failed");
+          setError(err instanceof Error ? err.message : "Sift Check failed");
           onComplete({
             score: 50,
             status: "needs_clarification",
@@ -64,12 +64,12 @@ export function SiftCheck({ url, onComplete }: SiftCheckProps) {
   }, [url, onComplete, phases.length]);
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-8 text-center">
+    <div className="rounded-xl border border-border bg-surface p-8 text-center">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent-violet/10">
-        <Search className="h-8 w-8 text-accent-violet animate-pulse" />
+        <Search className="h-8 w-8 animate-pulse text-accent-violet" />
       </div>
-      <h2 className="mt-6 text-xl font-semibold text-foreground">Syft Check in Progress</h2>
-      <p className="mt-2 text-sm text-text-secondary">Syft is analyzing your content for educational value</p>
+      <h2 className="mt-6 text-xl font-semibold text-foreground">Sift Check in progress</h2>
+      <p className="mt-2 text-sm text-text-secondary">Siftara is checking whether this can become a useful learning path.</p>
 
       <div className="mt-8 space-y-3 text-left max-w-sm mx-auto">
         {phases.map((p, idx) => (
@@ -112,7 +112,7 @@ export function SiftScoreCard({ result, onContinue }: SiftScoreCardProps) {
   const StatusIcon = config.icon;
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-8">
+    <div className="rounded-xl border border-border bg-surface p-8">
       <div className="text-center">
         <div className={`mx-auto flex h-20 w-20 items-center justify-center rounded-full ${config.bg}`}>
           <span className={`text-3xl font-bold ${config.color}`}>{result.score}</span>
@@ -137,7 +137,7 @@ export function SiftScoreCard({ result, onContinue }: SiftScoreCardProps) {
       {result.status !== "rejected" && (
         <button
           onClick={onContinue}
-          className="mt-8 w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-medium text-white hover:bg-primary-dark transition-colors"
+          className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
         >
           Continue to Goal Interview
           <ArrowRight className="h-4 w-4" />
@@ -147,7 +147,7 @@ export function SiftScoreCard({ result, onContinue }: SiftScoreCardProps) {
       {result.status === "rejected" && (
         <div className="mt-6 rounded-xl bg-surface-soft p-4 text-center">
           <p className="text-sm text-text-secondary">
-            This content doesn&apos;t meet our educational criteria. Try a tutorial, guide, or course playlist instead.
+            This link does not meet the educational criteria. Try a tutorial, guide, or course playlist instead. Your free My Sift was not consumed.
           </p>
         </div>
       )}

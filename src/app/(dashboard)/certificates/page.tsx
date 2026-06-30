@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShareButton } from "@/components/share-button";
+import { CertificatePreview } from "@/components/product-graphics";
 
 async function getCertificates(userId: string) {
   try {
@@ -37,10 +38,18 @@ export default async function CertificatesPage() {
   const certificates = await getCertificates(userId);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">My Certificates</h1>
-        <p className="mt-2 text-muted-foreground">Your verified learning achievements.</p>
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div className="mb-6 grid gap-4 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+        <div>
+          <Badge variant="secondary" className="mb-4 gap-1.5">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            Siftara Verified
+          </Badge>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Your proof library.</h1>
+        </div>
+        <p className="max-w-2xl text-muted-foreground lg:justify-self-end">
+          Certificates are signed records of completed checkpoints inside Siftara. Share the verification page when someone needs to inspect the criteria.
+        </p>
       </div>
 
       {certificates.length === 0 ? (
@@ -51,35 +60,34 @@ export default async function CertificatesPage() {
             </div>
             <h2 className="mt-4 text-lg font-semibold">No certificates yet</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Complete a learning path and pass assessments to earn your first certificate.
+              Finish the required checkpoints to earn your first Siftara Verified Certificate.
             </p>
             <Button asChild className="mt-6">
-              <Link href="/courses">Explore Courses</Link>
+              <Link href="/courses">Explore paths</Link>
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-5 lg:grid-cols-2">
           {certificates.map((certificate) => (
             <Card key={certificate.id} className="overflow-hidden border-border/50">
-              <div className="relative bg-gradient-to-br from-primary/5 via-transparent to-violet-500/5 p-6 text-center">
-                <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_2px_2px,currentColor_1px,transparent_0)] bg-[size:24px_24px]" />
-                <div className="relative">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-                    <Award className="h-6 w-6 text-primary" />
-                  </div>
-                  <p className="mt-4 text-xs uppercase tracking-wide text-muted-foreground">
-                    Siftara Verified Certificate
-                  </p>
-                  <h2 className="mt-2 text-xl font-semibold">{certificate.title}</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">Awarded to {certificate.learnerName}</p>
+              <div className="p-4">
+                <CertificatePreview
+                  learnerName={certificate.learnerName}
+                  title={certificate.title}
+                  certificateCode={certificate.certificateCode}
+                />
+              </div>
+              <CardContent className="p-5">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">Signed record</p>
+                  <h2 className="mt-1 text-xl font-semibold">{certificate.title}</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">Issued to {certificate.learnerName}</p>
                   <Badge variant="secondary" className="mt-4 gap-1.5">
                     <ShieldCheck className="h-3.5 w-3.5" />
                     Trust score {certificate.trustScore ?? 100}%
                   </Badge>
                 </div>
-              </div>
-              <CardContent className="p-6">
                 <div className="flex flex-wrap gap-1.5">
                   {certificate.skills.map((skill: string) => (
                     <Badge key={skill} variant="secondary">

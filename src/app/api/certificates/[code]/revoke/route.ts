@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
 import { getDb, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { requireAuth, isAuthError } from "@/lib/auth";
+import { isAuthError, isForbiddenError, requireAdmin } from "@/lib/auth";
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ code: string }> }
 ) {
   try {
-    await requireAuth();
+    await requireAdmin();
   } catch (e) {
     if (isAuthError(e)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (isForbiddenError(e)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     throw e;
   }
 

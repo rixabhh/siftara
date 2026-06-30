@@ -21,7 +21,7 @@ export function CourseFilters() {
   }
 
   return (
-    <div className="mb-8 flex flex-wrap gap-2">
+    <div className="my-6 flex flex-wrap gap-2">
       {categories.map((category) => (
         <Badge
           key={category}

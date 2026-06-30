@@ -7,7 +7,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SiftaraLogo } from "@/components/siftara-logo";
-import { Menu, X, Search } from "lucide-react";
+import { Menu, X, Search, Route } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -17,8 +17,8 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/90 backdrop-blur-xl">
+      <div className="mx-auto flex h-[60px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2 group">
           <SiftaraLogo className="h-7 w-7 transition-transform group-hover:scale-105" />
           <span className="text-lg font-bold tracking-tight">
@@ -28,9 +28,10 @@ export function Navbar() {
 
         {/* Desktop nav — centered */}
         <nav className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
-          {[
-            { href: "/courses", label: "Explore" },
+            {[
+            { href: "/courses", label: "Paths" },
             { href: "/my-sift", label: "My Sift" },
+            { href: "/how-verification-works", label: "Proof" },
             { href: "/certificates", label: "Certificates", show: isSignedIn },
           ]
             .filter((l) => l.show !== false)
@@ -58,7 +59,7 @@ export function Navbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-2">
-          <button className="p-2 text-muted-foreground hover:text-foreground transition-colors">
+          <button className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" aria-label="Search paths">
             <Search className="h-4 w-4" />
           </button>
           <ThemeToggle />
@@ -70,8 +71,11 @@ export function Navbar() {
             />
           ) : (
             <div className="hidden sm:flex items-center gap-2">
-              <Button size="sm" asChild>
-                <Link href="/sign-in">Sign In</Link>
+              <Button size="sm" variant="outline" asChild>
+                <Link href="/my-sift">
+                  <Route className="h-4 w-4" />
+                  Try My Sift
+                </Link>
               </Button>
             </div>
           )}
@@ -95,8 +99,9 @@ export function Navbar() {
             <SheetContent side="right" className="w-72">
               <nav className="flex flex-col gap-1 mt-8">
                 {[
-                  { href: "/courses", label: "Explore" },
+                  { href: "/courses", label: "Paths" },
                   { href: "/my-sift", label: "My Sift" },
+                  { href: "/how-verification-works", label: "Proof" },
                   { href: "/certificates", label: "Certificates", show: isSignedIn },
                   { href: "/dashboard", label: "Dashboard", show: isSignedIn },
                 ]
@@ -129,7 +134,7 @@ export function Navbar() {
                     className="mt-4"
                   >
                     <Button asChild className="w-full">
-                      <Link href="/sign-in" onClick={() => setMobileOpen(false)}>Sign In</Link>
+                      <Link href="/sign-in" onClick={() => setMobileOpen(false)}>Sign in</Link>
                     </Button>
                   </motion.div>
                 )}

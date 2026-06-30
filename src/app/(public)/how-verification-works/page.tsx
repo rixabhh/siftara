@@ -15,22 +15,23 @@ import {
 
 export default function HowVerificationWorksPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="text-center mb-12">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div className="mx-auto mb-8 max-w-3xl text-center">
         <Badge variant="secondary" className="mb-4 gap-1.5">
           <ShieldCheck className="h-3.5 w-3.5" />
           Certificate Trust
         </Badge>
-        <h1 className="text-4xl font-bold tracking-tight">How Siftara verifies learning</h1>
-        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">How Siftara verifies learning</h1>
+        <p className="mt-4 max-w-2xl mx-auto text-base leading-7 text-muted-foreground sm:text-lg">
           Siftara Verified Certificates are issued only after learners complete required lessons and pass the checkpoints defined for a learning path. Each certificate includes a unique ID, public verification link, and digital signature.
         </p>
       </div>
 
       {/* What a certificate proves */}
-      <section className="mb-12">
+      <div className="grid gap-5 lg:grid-cols-2">
+      <section>
         <Card className="border-border/50">
-          <CardContent className="p-8">
+          <CardContent className="p-5">
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
                 <Award className="h-5 w-5 text-emerald-500" />
@@ -47,9 +48,9 @@ export default function HowVerificationWorksPage() {
       </section>
 
       {/* What it does not claim */}
-      <section className="mb-12">
+      <section>
         <Card className="border-border/50">
-          <CardContent className="p-8">
+          <CardContent className="p-5">
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
                 <Lock className="h-5 w-5 text-amber-500" />
@@ -66,7 +67,7 @@ export default function HowVerificationWorksPage() {
       </section>
 
       {/* How learners earn certificates */}
-      <section className="mb-12">
+      <section className="lg:col-span-2">
         <h2 className="text-2xl font-bold mb-6">How learners earn certificates</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {[
@@ -86,9 +87,9 @@ export default function HowVerificationWorksPage() {
       </section>
 
       {/* Digital verification */}
-      <section className="mb-12">
+      <section>
         <Card className="border-border/50">
-          <CardContent className="p-8">
+          <CardContent className="p-5">
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
                 <ShieldCheck className="h-5 w-5 text-blue-500" />
@@ -105,9 +106,9 @@ export default function HowVerificationWorksPage() {
       </section>
 
       {/* Assessment strictness */}
-      <section className="mb-12">
+      <section>
         <Card className="border-border/50">
-          <CardContent className="p-8">
+          <CardContent className="p-5">
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/10">
                 <FileQuestion className="h-5 w-5 text-violet-500" />
@@ -124,9 +125,9 @@ export default function HowVerificationWorksPage() {
       </section>
 
       {/* How to verify */}
-      <section className="mb-12">
+      <section className="lg:col-span-2">
         <h2 className="text-2xl font-bold mb-6">How to verify a certificate</h2>
-        <div className="space-y-4">
+        <div className="grid gap-3 md:grid-cols-2">
           {[
             "Open the verification link or scan the QR code.",
             "Confirm the certificate status is valid.",
@@ -145,9 +146,9 @@ export default function HowVerificationWorksPage() {
       </section>
 
       {/* Source attribution */}
-      <section className="mb-12">
+      <section>
         <Card className="border-border/50">
-          <CardContent className="p-8">
+          <CardContent className="p-5">
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/10">
                 <Search className="h-5 w-5 text-rose-500" />
@@ -164,9 +165,9 @@ export default function HowVerificationWorksPage() {
       </section>
 
       {/* Report an issue */}
-      <section className="mb-12">
+      <section>
         <Card className="border-border/50">
-          <CardContent className="p-8">
+          <CardContent className="p-5">
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/10">
                 <Lock className="h-5 w-5 text-orange-500" />
@@ -183,7 +184,9 @@ export default function HowVerificationWorksPage() {
       </section>
 
       {/* CTAs */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+      </div>
+
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
         <Button size="lg" className="gap-2" asChild>
           <Link href="/courses">
             <Award className="h-4 w-4" />

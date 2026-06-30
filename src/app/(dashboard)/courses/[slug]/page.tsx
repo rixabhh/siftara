@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { CourseSignalCover, SiftMapArtifact } from "@/components/product-graphics";
 import { ArrowLeft, Play, Clock, BookOpen, Award, CheckCircle2, ShieldCheck } from "lucide-react";
 
 export default async function CourseDetailPage({
@@ -31,19 +32,20 @@ export default async function CourseDetailPage({
   const totalLessons = modules.reduce((acc, m) => acc + getLessonsByModule(m.id).length, 0);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <Button variant="ghost" size="sm" asChild className="mb-6">
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <Button variant="ghost" size="sm" asChild className="mb-4">
         <Link href="/courses" className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           All paths
         </Link>
       </Button>
 
-      <div className="grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-8">
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-6">
           {/* Header */}
-          <div>
-            <div className="flex flex-wrap gap-2 mb-4">
+          <div className="grid gap-5 sm:grid-cols-[1fr_240px] sm:items-start">
+            <div>
+            <div className="flex flex-wrap gap-2 mb-3">
               <Badge variant="secondary">{course.category}</Badge>
               <Badge variant="outline">{course.difficulty}</Badge>
               {course.certificateEnabled && (
@@ -54,7 +56,9 @@ export default async function CourseDetailPage({
               )}
             </div>
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{course.title}</h1>
-            <p className="mt-4 text-muted-foreground leading-relaxed text-lg">{course.description}</p>
+            <p className="mt-3 text-base leading-7 text-muted-foreground sm:text-lg">{course.description}</p>
+            </div>
+            <CourseSignalCover title={course.title} difficulty={course.difficulty} className="min-h-48" />
           </div>
 
           {/* Quick stats */}
@@ -93,7 +97,7 @@ export default async function CourseDetailPage({
                 <div>
                   <p className="text-sm font-medium">Source: {course.sourceCreator} on YouTube</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    All video content belongs to the respective creator. Siftara provides the learning path, progress tracking, quizzes, assessments, and verification layer.
+                    All video content belongs to the respective creator. Siftara provides the learning path, progress tracking, checkpoints, and verification layer.
                   </p>
                 </div>
               </div>
@@ -104,17 +108,29 @@ export default async function CourseDetailPage({
 
           {/* Roadmap */}
           <div>
-            <h2 className="text-xl font-semibold mb-2">Course roadmap</h2>
-            <p className="text-sm text-muted-foreground mb-6">
+            <h2 className="text-xl font-semibold mb-2">SiftMap</h2>
+            <p className="text-sm text-muted-foreground mb-4">
               {modules.length} modules with {totalLessons} lessons and checkpoint quizzes.
             </p>
-            <div className="space-y-4">
+            <SiftMapArtifact
+              compact
+              nodes={[
+                ...modules.slice(0, 3).map((module, index) => ({
+                  label: module.title,
+                  detail: `${getLessonsByModule(module.id).length} lessons`,
+                  status: index === 0 ? "current" as const : "locked" as const,
+                })),
+                { label: "Verified certificate", detail: "Issued after trust checks", status: "certificate" as const },
+              ]}
+              className="mb-4"
+            />
+            <div className="space-y-3">
               {modules.map((module, idx) => {
                 const lessons = getLessonsByModule(module.id);
                 const quiz = getQuizByModule(module.id);
                 return (
                   <Card key={module.id} className="border-border/50">
-                    <CardContent className="p-5">
+                    <CardContent className="p-4">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary">
                           {idx + 1}
@@ -159,10 +175,10 @@ export default async function CourseDetailPage({
 
         {/* Sidebar */}
         <div className="lg:col-span-1">
-          <div className="sticky top-20 space-y-6">
+          <div className="sticky top-20 space-y-4">
             {/* Start CTA */}
             <Card className="border-border/50">
-              <CardContent className="p-6">
+              <CardContent className="p-5">
                 <form action={enrollInCourse.bind(null, course.id)}>
                   <Button type="submit" className="w-full gap-2 h-12">
                     <Play className="h-4 w-4" />
@@ -177,7 +193,7 @@ export default async function CourseDetailPage({
 
             {/* Certificate requirements */}
             <Card className="border-border/50">
-              <CardContent className="p-6">
+              <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <ShieldCheck className="h-5 w-5 text-primary" />
                   <h3 className="font-semibold">Earn a certificate</h3>
@@ -202,17 +218,17 @@ export default async function CourseDetailPage({
 
             {/* What you'll learn */}
             <Card className="border-border/50">
-              <CardContent className="p-6">
+              <CardContent className="p-5">
                 <h3 className="font-semibold mb-3">What you will learn</h3>
                 <ul className="space-y-2">
                   {[
                     "Follow a structured learning path",
                     "Test knowledge with checkpoint quizzes",
-                    "Track your progress through modules",
+                    "Track progress through the SiftMap",
                     "Earn a verifiable certificate",
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0 shrink-0" />
+                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                       <span>{item}</span>
                     </li>
                   ))}

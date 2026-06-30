@@ -25,8 +25,8 @@ export const metadata: Metadata = {
     template: "%s | Siftara",
   },
   description:
-    "Siftara curates high-quality free learning content and turns it into AI-guided paths with roadmaps, quizzes, progress tracking, and free certificates.",
-  keywords: ["learning", "courses", "free", "AI", "certificates", "YouTube", "education"],
+    "Siftara turns carefully chosen free learning content into guided paths with checkpoints, progress, and verifiable certificates.",
+  keywords: ["learning paths", "free courses", "certificates", "YouTube learning", "education"],
   authors: [{ name: "Siftara" }],
   creator: "Siftara",
   openGraph: {
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     url: "https://siftara.com",
     siteName: "Siftara",
     title: "Siftara - Learn from the best free courses without getting lost",
-    description: "AI-guided learning paths from free content. Roadmaps, quizzes, progress tracking, and free certificates.",
+    description: "Guided learning paths from free content. Roadmaps, checkpoints, progress tracking, and verifiable certificates.",
     images: [
       {
         url: "/og-image.png",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Siftara - Learn from the best free courses without getting lost",
-    description: "AI-guided learning paths from free content. Roadmaps, quizzes, progress tracking, and free certificates.",
+    description: "Guided learning paths from free content. Roadmaps, checkpoints, progress tracking, and verifiable certificates.",
     images: ["/og-image.png"],
   },
   icons: {
@@ -65,8 +65,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+    { media: "(prefers-color-scheme: light)", color: "#F7FAF6" },
+    { media: "(prefers-color-scheme: dark)", color: "#070A09" },
   ],
   width: "device-width",
   initialScale: 1,

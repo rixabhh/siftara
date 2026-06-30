@@ -13,11 +13,11 @@ import {
   LockKeyhole,
   Route,
   ShieldCheck,
-  Sparkles,
   Zap,
 } from "lucide-react";
 import { SiftCheck, SiftScoreCard } from "@/components/my-sift/sift-check";
 import { GoalInterview } from "@/components/my-sift/goal-interview";
+import { ContentToPathGraphic, SiftMapArtifact } from "@/components/product-graphics";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,25 +70,25 @@ export default function MySiftPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-8 text-center">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div className="mb-6 text-center">
         <Badge variant="secondary" className="mb-4 gap-1.5">
-          <Sparkles className="h-3.5 w-3.5" />
-          My Sift personalization
+          <Route className="h-3.5 w-3.5" />
+          My Sift
         </Badge>
-        <h1 className="text-3xl font-bold tracking-tight">Turn a learning link into a trusted path</h1>
+        <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">Turn a learning link into a trusted path.</h1>
         <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-          Siftara verifies educational intent, asks about your goals, builds a roadmap, and gates certificates behind real learning evidence.
+          Paste a course link. Siftara checks the learning signal, asks what you want to achieve, then builds a roadmap around it.
         </p>
       </div>
 
       {step === "input" && (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
           <Card className="border-border/50">
             <CardHeader>
               <CardTitle>Paste a YouTube learning URL</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pb-5">
               <label htmlFor="youtube-url" className="mb-2 block text-sm font-medium">
                 YouTube video or playlist URL
               </label>
@@ -105,7 +105,7 @@ export default function MySiftPage() {
                   />
                 </div>
                 <Button onClick={handleCheck} className="h-12 gap-2">
-                  Run Sift Check
+                  Check this link
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -117,7 +117,7 @@ export default function MySiftPage() {
 
           <Card className="border-border/50">
             <CardHeader>
-              <CardTitle className="text-lg">Usage & Credits</CardTitle>
+              <CardTitle className="text-lg">Early access use</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="rounded-xl border bg-primary/5 p-4">
@@ -126,26 +126,30 @@ export default function MySiftPage() {
                   <Badge>{freeUseAvailable ? "Available" : "Used"}</Badge>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Extra paths use credits. Certificates remain free after trust checks.
+                  Generation may be queued when daily AI capacity is full. Certificates remain free after trust checks.
                 </p>
               </div>
               <Button variant="outline" asChild className="w-full gap-2">
                 <Link href="/pricing">
                   <CreditCard className="h-4 w-4" />
-                  View credit packs
+                  View pricing
                 </Link>
               </Button>
             </CardContent>
           </Card>
 
+          <div className="lg:col-span-2">
+            <ContentToPathGraphic />
+          </div>
+
           <div className="lg:col-span-2 grid gap-4 sm:grid-cols-3">
             {[
-              { title: "Strict Sift Check", icon: ShieldCheck, text: "Educational score decides certificate eligibility." },
-              { title: "Personal schedule", icon: CalendarDays, text: "Roadmap adapts to daily time and target date." },
-              { title: "Varied assessment", icon: FileQuestion, text: "Quiz variants reduce random certificate farming." },
+              { title: "Strict Sift Check", icon: ShieldCheck, text: "Non-learning content is rejected before your free use is consumed." },
+              { title: "Personal schedule", icon: CalendarDays, text: "Roadmap adapts to your daily time and finish window." },
+              { title: "Assessment gate", icon: FileQuestion, text: "Quiz variants and reflection evidence protect certificate quality." },
             ].map((item) => (
               <Card key={item.title} className="border-border/50">
-                <CardContent className="p-5">
+                <CardContent className="p-4">
                   <item.icon className="h-5 w-5 text-primary" />
                   <h3 className="mt-3 font-semibold">{item.title}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{item.text}</p>
@@ -193,7 +197,7 @@ export default function MySiftPage() {
       )}
 
       {step === "roadmap" && (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
           <Card className="border-border/50">
             <CardHeader>
               <CardTitle className="flex items-center justify-between gap-3">
@@ -206,7 +210,7 @@ export default function MySiftPage() {
             <CardContent>
               <div className="space-y-4">
                 {roadmap.map((node, index) => (
-                  <div key={node.title} className="flex gap-4 rounded-xl border bg-muted/30 p-4">
+                  <div key={node.title} className="flex gap-4 rounded-xl border bg-muted/30 p-3.5">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
                       {index + 1}
                     </div>
@@ -234,7 +238,15 @@ export default function MySiftPage() {
             </CardContent>
           </Card>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
+            <SiftMapArtifact
+              compact
+              nodes={roadmap.map((node, index) => ({
+                label: node.title,
+                detail: `${node.minutes} min`,
+                status: index < 2 ? "complete" : index === 2 ? "current" : "checkpoint",
+              }))}
+            />
             <Card className="border-border/50">
               <CardHeader>
                 <CardTitle className="text-lg">Schedule Preview</CardTitle>

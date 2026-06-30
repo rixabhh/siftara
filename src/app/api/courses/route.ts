@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb, schema } from "@/lib/db";
 import { seedCourses } from "@/lib/db/seed";
-import { requireAuth, isAuthError } from "@/lib/auth";
+import { isAuthError, isForbiddenError, requireAdmin } from "@/lib/auth";
 
 export async function GET() {
   try {
@@ -16,9 +16,10 @@ export async function GET() {
 export async function POST(request: Request) {
   let userId: string;
   try {
-    userId = await requireAuth();
+    userId = await requireAdmin();
   } catch (e) {
     if (isAuthError(e)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (isForbiddenError(e)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     throw e;
   }
 

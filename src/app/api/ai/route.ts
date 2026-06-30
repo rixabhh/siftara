@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { getDb, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { runSiftCheck, buildCurriculum, generateQuiz, buildRoadmap } from "@/lib/ai/agents";
+import { isAuthError, requireAuth } from "@/lib/auth";
+
+type RoadmapModuleInput = {
+  id: string;
+  title: string;
+  lessons: Array<{ id: string; title: string }>;
+};
 
 const AGENTS = [
   "sift-check",
@@ -23,8 +30,17 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  let userId: string;
+  try {
+    userId = await requireAuth();
+  } catch (e) {
+    if (isAuthError(e)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    throw e;
+  }
+
   const body = await request.json();
   const { agentType, input } = body;
+  const safeInput = stripClientIdentity(input);
 
   if (!agentType || !AGENTS.includes(agentType)) {
     return NextResponse.json(
@@ -41,11 +57,11 @@ export async function POST(request: Request) {
 
     await db.insert(schema.aiAgentJobs).values({
       id: jobId,
-      userId: input?.userId ?? null,
+      userId,
       agentType,
-      relatedEntityType: input?.entityType ?? null,
-      relatedEntityId: input?.entityId ?? null,
-      inputData: JSON.stringify(input),
+      relatedEntityType: getNullableString(safeInput.entityType),
+      relatedEntityId: getNullableString(safeInput.entityId),
+      inputData: JSON.stringify(safeInput),
       status: "processing",
       provider: "cloudflare",
       model: process.env.CLOUDFLARE_AI_MODEL ?? "@cf/meta/llama-3.1-8b-instruct",
@@ -58,34 +74,34 @@ export async function POST(request: Request) {
     switch (agentType) {
       case "sift-check":
         result = await runSiftCheck(
-          input.url,
-          input.title,
-          input.description,
-          input.channelName
+          getString(safeInput.url),
+          getString(safeInput.title),
+          getString(safeInput.description),
+          getString(safeInput.channelName)
         );
         break;
 
       case "curriculum-builder":
         result = await buildCurriculum(
-          input.url,
-          input.title,
-          input.description
+          getString(safeInput.url),
+          getString(safeInput.title),
+          getString(safeInput.description)
         );
         break;
 
       case "quiz-generator":
         result = await generateQuiz(
-          input.moduleTitle,
-          input.moduleDescription,
-          input.lessonTitles ?? [],
-          input.questionCount
+          getString(safeInput.moduleTitle),
+          getString(safeInput.moduleDescription),
+          getStringArray(safeInput.lessonTitles),
+          getNumber(safeInput.questionCount)
         );
         break;
 
       case "roadmap-builder":
         result = await buildRoadmap(
-          input.courseTitle,
-          input.modules ?? []
+          getString(safeInput.courseTitle),
+          getRoadmapModules(safeInput.modules)
         );
         break;
 
@@ -130,4 +146,49 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+}
+
+function stripClientIdentity(input: unknown): Record<string, unknown> {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return {};
+  const safeInput = { ...(input as Record<string, unknown>) };
+  delete safeInput.userId;
+  delete safeInput.user_id;
+  delete safeInput.email;
+  return safeInput;
+}
+
+function getString(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
+function getNullableString(value: unknown): string | null {
+  return typeof value === "string" && value ? value : null;
+}
+
+function getNumber(value: unknown): number | undefined {
+  return typeof value === "number" ? value : undefined;
+}
+
+function getStringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+function getRoadmapModules(value: unknown): RoadmapModuleInput[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object" && !Array.isArray(item))
+    .map((item) => ({
+      id: getString(item.id),
+      title: getString(item.title),
+      lessons: getRoadmapLessons(item.lessons),
+    }))
+    .filter((item) => item.id && item.title);
+}
+
+function getRoadmapLessons(value: unknown): RoadmapModuleInput["lessons"] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object" && !Array.isArray(item))
+    .map((item) => ({ id: getString(item.id), title: getString(item.title) }))
+    .filter((item) => item.id && item.title);
 }

@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ShieldCheck, Lock, Route, Clock, Trophy } from "lucide-react";
-import { getDb, schema } from "@/lib/db";
+import type { ComponentType } from "react";
+import { CheckCircle2, ExternalLink, Fingerprint, Lock, Route, ShieldCheck, XCircle } from "lucide-react";
 import { eq } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
 import { getCertificateByCode } from "@/lib/db/seed";
 import { buildCertificatePayload, verifyCertificate } from "@/lib/certificate-signing";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 async function getCertificate(code: string) {
   try {
@@ -32,6 +34,7 @@ async function getCertificate(code: string) {
         signedPayloadHash: cert.signedPayloadHash,
         digitalSignature: cert.digitalSignature,
         criteriaVersion: cert.criteriaVersion,
+        criteria: [] as string[],
       };
     }
   } catch {}
@@ -54,6 +57,7 @@ async function getCertificate(code: string) {
     signedPayloadHash: null,
     digitalSignature: null,
     criteriaVersion: "v1",
+    criteria: seedCert.criteria,
   };
 }
 
@@ -78,11 +82,7 @@ export default async function CertificateVerifyPage({
       skillsJson: JSON.stringify(certificate.skills),
       issuedAt: certificate.issuedAt,
     });
-    signatureStatus = await verifyCertificate(
-      payload,
-      certificate.digitalSignature,
-      certificate.signedPayloadHash
-    );
+    signatureStatus = await verifyCertificate(payload, certificate.digitalSignature, certificate.signedPayloadHash);
   }
 
   const issuedAt = new Intl.DateTimeFormat("en", {
@@ -93,98 +93,147 @@ export default async function CertificateVerifyPage({
 
   const isRevoked = certificate.status === "revoked";
   const isValid = !isRevoked && signatureStatus?.valid !== false;
+  const signatureLabel = signatureStatus
+    ? signatureStatus.valid
+      ? "Digital signature verified"
+      : "Signature mismatch"
+    : "Record verified in Siftara";
+  const criteria = certificate.criteria ?? [];
+  const visibleCriteria = criteria.length
+    ? criteria
+    : ["Required lessons completed", "Checkpoint assessments passed", "Reflection evidence submitted"];
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-2xl">
-        {/* Certificate card */}
-        <div className="rounded-2xl border bg-background overflow-hidden">
-          {/* Header — Siftara Verified */}
-          <div className="flex items-center justify-between px-8 py-5 border-b">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <ShieldCheck className="h-5 w-5" />
+    <div className="min-h-screen bg-surface-soft/40 px-4 py-6 sm:py-8">
+      <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+        <Card className="overflow-hidden border-border/70 bg-card">
+          <div className="border-b bg-[#0d1117] p-5 text-white dark:bg-surface">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold tracking-tight">Siftara Verified</p>
+                  <p className="font-mono text-xs text-white/55">{certificate.certificateCode}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-lg font-bold tracking-tight">Siftara Verified</p>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Authentic Credential</p>
-              </div>
-            </div>
-            <Badge variant={isValid ? "default" : "destructive"} className="gap-1.5 px-3 py-1.5">
-              <span className={`h-1.5 w-1.5 rounded-full ${isValid ? "bg-primary-foreground" : "bg-destructive-foreground"}`} />
-              {isRevoked ? "REVOKED" : "VALID STATUS"}
-            </Badge>
-          </div>
-
-          {/* Learner info */}
-          <div className="px-8 py-10 border-b">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">This verifies that</p>
-            <h1 className="text-4xl font-bold tracking-tight mb-6">{certificate.learnerName}</h1>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Has successfully completed</p>
-            <h2 className="text-2xl font-bold tracking-tight">{certificate.title}</h2>
-          </div>
-
-          {/* Proof of Work */}
-          <div className="px-8 py-8 border-b">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-4">Proof of Work</p>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="rounded-xl border p-4 text-center">
-                <Route className="h-5 w-5 text-primary mx-auto mb-2" />
-                <p className="text-xs text-muted-foreground mb-1">SiftMap Nodes</p>
-                <p className="text-2xl font-bold font-mono">42/42</p>
-              </div>
-              <div className="rounded-xl border p-4 text-center">
-                <Clock className="h-5 w-5 text-primary mx-auto mb-2" />
-                <p className="text-xs text-muted-foreground mb-1">Verified Time</p>
-                <p className="text-2xl font-bold font-mono">128 hrs</p>
-              </div>
-              <div className="rounded-xl border p-4 text-center">
-                <Trophy className="h-5 w-5 text-primary mx-auto mb-2" />
-                <p className="text-xs text-muted-foreground mb-1">Sift Score</p>
-                <p className="text-2xl font-bold font-mono text-primary">{certificate.trustScore}%</p>
-              </div>
+              <Badge variant={isValid ? "default" : "destructive"} className="w-fit gap-1.5 px-3 py-1.5">
+                {isValid ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
+                {isRevoked ? "Revoked" : isValid ? "Valid" : "Needs review"}
+              </Badge>
             </div>
           </div>
 
-          {/* Certificate details */}
-          <div className="px-8 py-6 bg-muted/30">
-            <div className="flex items-start justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-muted-foreground">ID:</span>
-                  <span className="font-mono font-medium">{certificate.certificateCode}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-muted-foreground">Issued:</span>
-                  <span className="font-mono font-medium">{issuedAt}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-primary font-medium mt-2">
-                  <Lock className="h-3.5 w-3.5" />
-                  Digital Signature Verified
-                </div>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-20 h-20 bg-foreground rounded-lg" />
-                <p className="text-xs text-muted-foreground">Scan to verify</p>
-              </div>
+          <CardContent className="p-5 sm:p-6">
+            <p className="text-xs uppercase text-muted-foreground">This verifies that</p>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{certificate.learnerName}</h1>
+            <p className="mt-6 text-xs uppercase text-muted-foreground">Completed</p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight">{certificate.title}</h2>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <ProofMetric icon={Route} label="Criteria version" value={certificate.criteriaVersion} />
+              <ProofMetric icon={Fingerprint} label="Signature" value={signatureStatus?.valid === false ? "Mismatch" : "Verified"} />
+              <ProofMetric icon={ShieldCheck} label="Trust score" value={`${certificate.trustScore}%`} />
             </div>
-          </div>
+
+            <div className="mt-6 rounded-lg border bg-muted/40 p-4">
+              <p className="text-sm font-semibold">Verification summary</p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{certificate.verificationSummary}</p>
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-2">
+              {certificate.skills.map((skill: string) => (
+                <Badge key={skill} variant="secondary">
+                  {skill}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="space-y-5">
+          <Card className="border-border/70">
+            <CardContent className="p-5">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Lock className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="font-semibold">Record status</h2>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{signatureLabel}</p>
+                </div>
+              </div>
+              <div className="mt-5 space-y-3 border-t pt-5 text-sm">
+                <div className="flex justify-between gap-4">
+                  <span className="text-muted-foreground">Issued</span>
+                  <span className="font-medium">{issuedAt}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-muted-foreground">Status</span>
+                  <span className="font-medium">{certificate.status}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-muted-foreground">Certificate ID</span>
+                  <span className="font-mono text-xs font-medium">{certificate.certificateCode}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/70">
+            <CardContent className="p-5">
+              <h2 className="font-semibold">Completion criteria</h2>
+              <div className="mt-4 space-y-2">
+                {visibleCriteria.map((criterion) => (
+                  <div key={criterion} className="flex gap-2 rounded-lg border bg-background px-3 py-2 text-sm">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <span>{criterion}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/70">
+            <CardContent className="p-5">
+              <h2 className="font-semibold">What this means</h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                This certificate verifies completion inside Siftara. It is not an academic degree, professional license, or creator endorsement.
+              </p>
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                <Button asChild>
+                  <Link href="/courses">
+                    Explore paths
+                    <ExternalLink className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link href="/how-verification-works">Verification rules</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-
-        {/* CTA */}
-        <div className="mt-8 text-center">
-          <Button size="lg" className="gap-2" asChild>
-            <Link href="/courses">
-              Explore Siftara
-            </Link>
-          </Button>
-        </div>
-
-        {/* Disclaimer */}
-        <p className="mt-6 text-xs text-center text-muted-foreground leading-relaxed max-w-lg mx-auto">
-          This certificate verifies the completion of the stated curriculum on the Siftara platform. Siftara is a private learning and verification platform and is not an accredited university. The verification status reflects the digital integrity of the record at the time of viewing.
-        </p>
       </div>
+    </div>
+  );
+}
+
+function ProofMetric({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-lg border bg-background p-4">
+      <Icon className="h-4 w-4 text-primary" />
+      <p className="mt-3 text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 font-mono text-sm font-semibold">{value}</p>
     </div>
   );
 }
