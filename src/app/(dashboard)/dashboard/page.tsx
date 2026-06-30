@@ -1,8 +1,9 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { seedCertificates, seedCourses } from "@/lib/db/seed";
 import { learnerProfile } from "@/lib/growth/phase-data";
+import { ensureUserExists } from "@/lib/db/user-sync";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +25,18 @@ import {
 export default async function DashboardPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
+
+  // Sync user to D1 on visit (ensures user exists for API calls)
+  try {
+    const client = await clerkClient();
+    const user = await client.users.getUser(userId);
+    await ensureUserExists({
+      id: userId,
+      email: user.emailAddresses?.[0]?.emailAddress ?? "",
+      name: [user.firstName, user.lastName].filter(Boolean).join(" ") || "Learner",
+      avatarUrl: user.imageUrl,
+    });
+  } catch {}
 
   const activeCourse = seedCourses[0];
 

@@ -1,13 +1,26 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ensureUserExists } from "@/lib/db/user-sync";
 import { Sparkles, Brain, Route, FileQuestion, Trophy, Users, Zap, ShieldCheck } from "lucide-react";
 
 export default async function AdminPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
+
+  // Sync user to D1 on visit
+  try {
+    const client = await clerkClient();
+    const user = await client.users.getUser(userId);
+    await ensureUserExists({
+      id: userId,
+      email: user.emailAddresses?.[0]?.emailAddress ?? "",
+      name: [user.firstName, user.lastName].filter(Boolean).join(" ") || "Admin",
+      avatarUrl: user.imageUrl,
+    });
+  } catch {}
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
