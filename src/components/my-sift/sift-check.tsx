@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Search, CheckCircle, AlertTriangle, XCircle, ArrowRight } from "lucide-react";
+import { api } from "@/lib/api";
 
 interface SiftCheckResult {
   score: number;
@@ -15,46 +16,60 @@ interface SiftCheckProps {
   onComplete: (result: SiftCheckResult) => void;
 }
 
-export function SiftCheck({ url: _url, onComplete }: SiftCheckProps) {
-  void _url;
+export function SiftCheck({ url, onComplete }: SiftCheckProps) {
   const [phase, setPhase] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const phases = [
-    "Checking title...",
-    "Analyzing description...",
-    "Evaluating playlist structure...",
-    "Assessing learning intent...",
-    "Scoring suitability...",
+    "Syft is checking title...",
+    "Syft is analyzing description...",
+    "Syft is evaluating playlist structure...",
+    "Syft is assessing learning intent...",
+    "Syft is scoring suitability...",
   ];
 
   useEffect(() => {
-    if (phase < phases.length - 1) {
-      const timer = setTimeout(() => setPhase((p) => p + 1), 800);
-      return () => clearTimeout(timer);
+    let cancelled = false;
+
+    async function runCheck() {
+      try {
+        for (let i = 0; i < phases.length - 1; i++) {
+          if (cancelled) return;
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          if (cancelled) return;
+          setPhase(i + 1);
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 600));
+        if (cancelled) return;
+
+        const response = await api.ai.siftCheck({ url });
+        if (!cancelled) {
+          onComplete(response.result as SiftCheckResult);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Syft check failed");
+          onComplete({
+            score: 50,
+            status: "needs_clarification",
+            reason: "Could not evaluate content automatically. Please provide more details.",
+            signals: ["Automated evaluation incomplete"],
+          });
+        }
+      }
     }
-    const timer = setTimeout(() => {
-      const score = Math.floor(Math.random() * 40) + 60;
-      const status = score >= 80 ? "approved" : score >= 60 ? "needs_clarification" : "notes_only";
-      onComplete({
-        score,
-        status: status as SiftCheckResult["status"],
-        reason: status === "approved"
-          ? "This content appears to be educational and suitable for structured learning."
-          : status === "needs_clarification"
-          ? "This content may be educational but needs more context."
-          : "This content has limited educational structure.",
-        signals: ["Tutorial format detected", "Consistent topic coverage", "Appropriate video length"],
-      });
-    }, 600);
-    return () => clearTimeout(timer);
-  }, [phase, phases.length, onComplete]);
+
+    runCheck();
+    return () => { cancelled = true; };
+  }, [url, onComplete, phases.length]);
 
   return (
     <div className="rounded-2xl border border-border bg-surface p-8 text-center">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent-violet/10">
         <Search className="h-8 w-8 text-accent-violet animate-pulse" />
       </div>
-      <h2 className="mt-6 text-xl font-semibold text-foreground">Sift Check in Progress</h2>
-      <p className="mt-2 text-sm text-text-secondary">Analyzing your content for educational value</p>
+      <h2 className="mt-6 text-xl font-semibold text-foreground">Syft Check in Progress</h2>
+      <p className="mt-2 text-sm text-text-secondary">Syft is analyzing your content for educational value</p>
 
       <div className="mt-8 space-y-3 text-left max-w-sm mx-auto">
         {phases.map((p, idx) => (
@@ -72,6 +87,10 @@ export function SiftCheck({ url: _url, onComplete }: SiftCheckProps) {
           </div>
         ))}
       </div>
+
+      {error && (
+        <p className="mt-4 text-sm text-destructive">{error}</p>
+      )}
     </div>
   );
 }

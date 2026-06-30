@@ -15,10 +15,10 @@ export default function LaunchPage() {
             Public beta launch kit
           </Badge>
           <h1 className="text-4xl font-bold tracking-tight lg:text-5xl">
-            Siftara turns free learning into guided, verified progress.
+            Siftara + Syft: Free learning, guided and verified.
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-            Product Hunt-ready positioning, share loops, certificate proof, My Sift messaging, and launch metrics in one place.
+            Syft AI powers content evaluation, course generation, and assessment. Product Hunt-ready positioning, share loops, certificate proof, and launch metrics.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button asChild className="gap-2">

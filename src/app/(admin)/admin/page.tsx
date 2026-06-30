@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Brain, Route, FileQuestion, Trophy } from "lucide-react";
+import { Sparkles, Brain, Route, FileQuestion, Trophy, Users, Zap, ShieldCheck } from "lucide-react";
 
 export default async function AdminPage() {
   const { userId } = await auth();
@@ -12,15 +12,15 @@ export default async function AdminPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-        <p className="mt-2 text-muted-foreground">Manage courses, review AI outputs, and publish content.</p>
+        <p className="mt-2 text-muted-foreground">Manage courses, review Syft outputs, and publish content.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         {[
-          { label: "Published", value: "0", icon: Route, color: "text-emerald-500" },
+          { label: "Published", value: "5", icon: Route, color: "text-emerald-500" },
           { label: "Drafts", value: "0", icon: FileQuestion, color: "text-amber-500" },
-          { label: "AI Jobs Pending", value: "0", icon: Brain, color: "text-violet-500" },
-          { label: "Total Learners", value: "0", icon: Trophy, color: "text-blue-500" },
+          { label: "Syft Jobs", value: "0", icon: Brain, color: "text-violet-500" },
+          { label: "Total Learners", value: "0", icon: Users, color: "text-blue-500" },
         ].map((stat) => (
           <Card key={stat.label} className="border-border/50">
             <CardContent className="p-5">
@@ -40,7 +40,7 @@ export default async function AdminPage() {
             <CardTitle className="text-lg">Course Builder</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">Create new courses manually or with AI assistance.</p>
+            <p className="text-sm text-muted-foreground mb-4">Create new courses manually or with Syft assistance.</p>
             <Button className="gap-2">
               <Sparkles className="h-4 w-4" />
               Create New Course
@@ -50,10 +50,10 @@ export default async function AdminPage() {
 
         <Card className="border-border/50">
           <CardHeader>
-            <CardTitle className="text-lg">AI Course Generator</CardTitle>
+            <CardTitle className="text-lg">Syft Course Generator</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">Paste a YouTube URL and let AI generate a course structure.</p>
+            <p className="text-sm text-muted-foreground mb-4">Paste a YouTube URL and let Syft generate a course structure.</p>
             <div className="flex gap-2">
               <input
                 type="url"
@@ -69,28 +69,67 @@ export default async function AdminPage() {
         </Card>
       </div>
 
-      <Card className="border-border/50">
+      <Card className="border-border/50 mb-8">
         <CardHeader>
-          <CardTitle className="text-lg">AI Agent Status</CardTitle>
+          <CardTitle className="text-lg">Syft Agent Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { name: "Sift Check", status: "ready" },
-              { name: "Curriculum Builder", status: "ready" },
-              { name: "Quiz Generator", status: "ready" },
-              { name: "Assessment Variants", status: "ready" },
-              { name: "Certificate Trust Review", status: "ready" },
-              { name: "Roadmap Builder", status: "ready" },
+              { name: "Sift Check", description: "Evaluates educational content", status: "ready", icon: ShieldCheck },
+              { name: "Curriculum Builder", description: "Creates course structures", status: "ready", icon: Route },
+              { name: "Quiz Generator", description: "Generates assessment questions", status: "ready", icon: FileQuestion },
+              { name: "Roadmap Builder", description: "Builds learning paths", status: "ready", icon: Zap },
             ].map((agent) => (
-              <div key={agent.name} className="flex items-center gap-3 rounded-xl border p-3">
-                <div className={`h-2 w-2 rounded-full ${agent.status === "ready" ? "bg-emerald-500" : "bg-amber-500"}`} />
+              <div key={agent.name} className="flex items-start gap-3 rounded-xl border p-4">
+                <div className={`h-2 w-2 rounded-full mt-1.5 ${agent.status === "ready" ? "bg-emerald-500" : "bg-amber-500"}`} />
                 <div>
-                  <p className="text-sm font-medium">{agent.name}</p>
-                  <p className="text-xs text-muted-foreground capitalize">{agent.status}</p>
+                  <div className="flex items-center gap-2">
+                    <agent.icon className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-medium">{agent.name}</p>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">{agent.description}</p>
+                  <p className="mt-1 text-xs capitalize text-emerald-600">{agent.status}</p>
                 </div>
               </div>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-border/50">
+        <CardHeader>
+          <CardTitle className="text-lg">Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Button variant="outline" className="justify-start gap-3 h-auto py-4" asChild>
+              <a href="/courses">
+                <Trophy className="h-5 w-5 text-amber-500" />
+                <div className="text-left">
+                  <p className="font-medium">View Courses</p>
+                  <p className="text-xs text-muted-foreground">Browse curated paths</p>
+                </div>
+              </a>
+            </Button>
+            <Button variant="outline" className="justify-start gap-3 h-auto py-4" asChild>
+              <a href="/my-sift">
+                <Sparkles className="h-5 w-5 text-violet-500" />
+                <div className="text-left">
+                  <p className="font-medium">Test My Sift</p>
+                  <p className="text-xs text-muted-foreground">Try the Syft flow</p>
+                </div>
+              </a>
+            </Button>
+            <Button variant="outline" className="justify-start gap-3 h-auto py-4" asChild>
+              <a href="/certificates/verify/SIFT-REACT-MASTERY-DEMO">
+                <ShieldCheck className="h-5 w-5 text-emerald-500" />
+                <div className="text-left">
+                  <p className="font-medium">Verify Certificate</p>
+                  <p className="text-xs text-muted-foreground">Check demo certificate</p>
+                </div>
+              </a>
+            </Button>
           </div>
         </CardContent>
       </Card>

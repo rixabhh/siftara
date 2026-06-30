@@ -29,6 +29,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QuizPlayer } from "@/components/quiz/quiz-player";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 type LearningQuiz = Quiz & { questions: QuizQuestion[] };
@@ -147,6 +148,13 @@ export function LearningWorkspace({ course, modules, certificateCode }: Learning
 
   function markLessonComplete(lessonId: string) {
     setCompletedLessons((current) => new Set(current).add(lessonId));
+    // Persist to API (best-effort, non-blocking)
+    try {
+      const userId = localStorage.getItem("siftara-user-id");
+      if (userId) {
+        api.progress.update(userId, course.id, lessonId, "completed").catch(() => {});
+      }
+    } catch {}
   }
 
   function goToNext() {
@@ -168,6 +176,18 @@ export function LearningWorkspace({ course, modules, certificateCode }: Learning
     } else {
       setFailedQuizzes((current) => ({ ...current, [quizId]: score }));
     }
+    // Persist quiz attempt to API (best-effort, non-blocking)
+    try {
+      const userId = localStorage.getItem("siftara-user-id");
+      if (userId) {
+        api.quizzes.submit(quizId, {
+          userId,
+          score,
+          passed,
+          variantId: activeQuizVariant?.variantId,
+        }).catch(() => {});
+      }
+    } catch {}
   }
 
   function retryQuiz(quizId: string) {
