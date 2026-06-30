@@ -6,9 +6,8 @@ import { FadeIn, FadeInStagger, StaggerItem } from "@/components/animations";
 import {
   CertificatePreview,
   ContentToPathGraphic,
-  SiftCheckGraphic,
-  SiftMapArtifact,
 } from "@/components/product-graphics";
+import { HeroPathGraphic } from "@/components/hero-path-graphic";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -97,11 +96,7 @@ export default function Home() {
           </FadeIn>
 
           <FadeIn delay={0.15} className="hidden md:block">
-            <div className="grid gap-3 md:grid-cols-[1fr_0.76fr] lg:max-h-[540px]">
-              <SiftMapArtifact compact className="sm:row-span-2" />
-              <SiftCheckGraphic className="min-h-[210px]" />
-              <CertificatePreview className="min-h-[210px]" />
-            </div>
+            <HeroPathGraphic />
           </FadeIn>
         </div>
       </section>
