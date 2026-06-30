@@ -39,7 +39,7 @@ export function SiftMapArtifact({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-xl border bg-[linear-gradient(135deg,var(--surface),var(--surface-soft))] p-5 shadow-[0_24px_80px_-48px_rgba(16,21,19,0.45)]",
+        "relative overflow-hidden rounded-xl border bg-[linear-gradient(135deg,var(--surface),var(--surface-soft))] p-4 shadow-[0_24px_80px_-48px_rgba(16,21,19,0.45)]",
         className
       )}
     >
@@ -52,13 +52,13 @@ export function SiftMapArtifact({
         <span className="font-mono text-xs text-muted-foreground">path.signal/05</span>
       </div>
 
-      <div className={cn("relative mt-7", compact ? "space-y-4" : "space-y-5")}>
-        <div className="absolute left-5 top-5 bottom-5 w-px bg-border" />
-        <div className="absolute left-5 top-5 h-[54%] w-px bg-primary" />
+      <div className={cn("relative mt-5", compact ? "space-y-3" : "space-y-4")}>
+        <div className="absolute left-4 top-4 bottom-4 w-px bg-border" />
+        <div className="absolute left-4 top-4 h-[54%] w-px bg-primary" />
         {nodes.map((node, index) => (
           <div key={node.label} className="relative flex items-start gap-4">
             <SiftNodeIcon status={node.status} index={index} />
-            <div className="min-w-0 flex-1 rounded-lg border bg-background/80 px-3 py-2.5 shadow-sm backdrop-blur">
+            <div className="min-w-0 flex-1 rounded-lg border bg-background/80 px-3 py-2 shadow-sm backdrop-blur">
               <div className="flex items-center justify-between gap-3">
                 <p className="truncate text-sm font-semibold">{node.label}</p>
                 <span className="font-mono text-[11px] text-muted-foreground">
@@ -99,7 +99,7 @@ function SiftNodeIcon({ status, index }: { status?: SiftNode["status"]; index: n
   return (
     <div
       className={cn(
-        "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2",
+        "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2",
         classes[status ?? "locked"]
       )}
       aria-label={`SiftMap node ${index + 1}`}
@@ -117,15 +117,15 @@ export function SiftCheckGraphic({ className }: { className?: string }) {
   ];
 
   return (
-    <div className={cn("relative overflow-hidden rounded-xl border bg-card p-5", className)}>
+    <div className={cn("relative overflow-hidden rounded-xl border bg-card p-4 shadow-sm transition-shadow duration-300 hover:shadow-md", className)}>
       <GridTexture />
       <div className="relative flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-semibold">Sift Check</p>
           <p className="mt-1 text-xs text-muted-foreground">Link checked before a path is created.</p>
         </div>
-        <div className="relative flex h-14 w-14 items-center justify-center rounded-full border bg-primary/10 text-primary">
-          <div className="absolute inset-1 rounded-full border border-primary/20" />
+        <div className="relative flex h-12 w-12 items-center justify-center rounded-full border-2 border-primary/20 bg-primary/10 text-primary">
+          <div className="absolute inset-1 rounded-full border border-primary/15" />
           <span className="font-mono text-lg font-bold">86</span>
         </div>
       </div>
@@ -156,11 +156,11 @@ export function CertificatePreview({
   certificateCode?: string;
 }) {
   return (
-    <div className={cn("relative overflow-hidden rounded-xl border bg-card p-5", className)}>
+    <div className={cn("relative overflow-hidden rounded-xl border bg-card p-4", className)}>
       <GridTexture />
-      <div className="relative flex items-center justify-between border-b pb-4">
+      <div className="relative flex items-center justify-between border-b pb-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
@@ -173,13 +173,13 @@ export function CertificatePreview({
           Valid
         </Badge>
       </div>
-      <div className="relative py-5">
+      <div className="relative py-3">
         <p className="text-xs uppercase text-muted-foreground">Issued to</p>
-        <p className="mt-1 text-2xl font-bold tracking-tight">{learnerName}</p>
-        <p className="mt-4 text-xs uppercase text-muted-foreground">Completed path</p>
-        <p className="mt-1 text-lg font-semibold">{title}</p>
+        <p className="mt-0.5 text-xl font-bold tracking-tight">{learnerName}</p>
+        <p className="mt-3 text-xs uppercase text-muted-foreground">Completed path</p>
+        <p className="mt-0.5 text-base font-semibold">{title}</p>
       </div>
-      <div className="relative grid grid-cols-[1fr_auto] gap-4 border-t pt-4">
+      <div className="relative grid grid-cols-[1fr_auto] gap-3 border-t pt-2">
         <div className="space-y-2 text-sm">
           <p className="flex items-center gap-2">
             <FileCheck2 className="h-4 w-4 text-primary" />
@@ -277,7 +277,7 @@ export function CourseSignalCover({
 
 function QrMark() {
   return (
-    <div className="grid h-16 w-16 grid-cols-4 grid-rows-4 gap-1 rounded-lg border bg-background p-2">
+    <div className="grid h-12 w-12 grid-cols-4 grid-rows-4 gap-1 rounded-lg border bg-background p-1.5">
       {Array.from({ length: 16 }).map((_, index) => (
         <span
           key={index}
